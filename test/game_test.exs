@@ -1,11 +1,11 @@
-defmodule MudTest do
+defmodule GameTest do
   use ExUnit.Case
-  doctest Mud
-  alias Mud.{TestServer}
+  doctest Game
+  alias Game.{Server}
 
   test "greets the world" do
-    TestServer.start_link(5001)
-    {:ok, socket} = :gen_tcp.connect('localhost', 5001, [])
+    port = Application.get_env(:game, :port)
+    {:ok, socket} = :gen_tcp.connect('localhost', port, [])
     IO.inspect(socket, label: "socket")
     :ok = :gen_tcp.send(socket, 'BU!\r')
 

@@ -10,7 +10,7 @@ defmodule Game.Application do
     children = [
       # Starts a worker by calling: Game.Worker.start_link(arg)
       # {Game.Worker, arg}
-      {Game.Server, 5000}
+      {Game.Server, Application.get_env(:game, :port)}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
