@@ -1,6 +1,7 @@
 defmodule Game.Conversation do
   use GenServer
   alias Game.Session
+  require Logger
 
   def init(args) do
     {:ok, args}
@@ -26,7 +27,7 @@ defmodule Game.Conversation do
   end
 
   def handle_info({:tcp_closed, port}, state) do
-    IO.puts("Closed #{inspect(port)}")
+    Logger.info("Closed #{inspect(port)}")
     {:stop, :normal, state}
   end
 end

@@ -5,6 +5,13 @@ defmodule Game.Language do
     |> eval()
   end
 
+  @doc """
+  Parses a source string.
+
+  Examples:
+  iex> parse("()")
+  {:ok, []}
+  """
   def parse(source) do
     source
     |> String.to_charlist()
