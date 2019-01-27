@@ -11,7 +11,15 @@ defmodule Game.LanguageTest do
 
   describe "parse" do
     test "parses an empty list" do
-      assert Language.parse("()") == []
+      assert Language.parse("()") == {:ok, []}
+    end
+
+    test "parses a list" do
+      assert Language.parse("(f x)") == {:ok, [:f, :x]}
+    end
+
+    test "returns error when given incorrect source" do
+      assert Language.parse(")") == {:error, {1, :lfe_parse, {:illegal, :")"}}}
     end
   end
 end

@@ -6,7 +6,9 @@ defmodule Game.Language do
   end
 
   def parse(source) do
-    []
+    source
+    |> String.to_charlist()
+    |> :lfe_io.read_string()
   end
 
   def eval(code) do
