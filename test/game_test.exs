@@ -1,6 +1,7 @@
 defmodule GameTest do
   use ExUnit.Case
   doctest Game
+  require Logger
 
   test "lfe" do
     assert :newlfe.example_square(8) == 64
@@ -9,12 +10,11 @@ defmodule GameTest do
   test "greets the world" do
     port = Application.get_env(:game, :port)
     {:ok, socket} = :gen_tcp.connect('localhost', port, [])
-    # IO.inspect(socket, label: "socket")
+    Logger.info(socket, label: "socket")
     :ok = :gen_tcp.send(socket, 'BU!\r')
 
     receive do
-      # IO.inspect(msg, label: "got")
-      msg -> nil
+      msg -> Logger.info(msg, label: "got")
     after
       1000 -> true
     end

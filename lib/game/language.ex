@@ -1,8 +1,7 @@
 defmodule Game.Language do
   def run(source) do
-    source
-    |> parse()
-    |> eval()
+    {:ok, code} = parse(source)
+    eval(code)
   end
 
   @doc """
@@ -11,6 +10,10 @@ defmodule Game.Language do
   Examples:
   iex> parse("()")
   {:ok, []}
+  iex> parse("(f x)")
+  {:ok, [:f, :x]}
+  iex> parse(")")
+  {:error, {1, :lfe_parse, {:illegal, :")"}}}
   """
   def parse(source) do
     source
@@ -18,9 +21,10 @@ defmodule Game.Language do
     |> :lfe_io.read_string()
   end
 
-  def eval(code) do
-    code
-    |> IO.inspect()
-    |> Code.eval_quoted()
+  def eval([function | params]) do
+    code = {function, [context: Elixir, import: Kernel], params}
+    IO.inspect(code)
+    {result, _} = Code.eval_quoted(code)
+    result
   end
 end
