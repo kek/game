@@ -23,7 +23,7 @@ defmodule Game.Language do
   end
 
   def eval(ast) do
-    {result, _} = Code.eval_quoted(ast)
+    {result, _binding} = Code.eval_quoted(ast)
     result
   end
 
@@ -34,11 +34,7 @@ defmodule Game.Language do
   iex> compile([:+, 1, 2])
   {:ok, {:+, [], [1, 2]}}
   """
-  def compile([:+ | params]) do
-    ast(:+, params)
-  end
+  def compile([:+ | params]), do: ast(:+, params)
 
-  defp ast(function, params) do
-    {:ok, {function, [], params}}
-  end
+  defp ast(function, params), do: {:ok, {function, [], params}}
 end
