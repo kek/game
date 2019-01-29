@@ -21,4 +21,8 @@ defmodule GameTest do
 
     :ok = :gen_tcp.close(socket)
   end
+
+  test "call LFE function" do
+    assert :newlfe.foo() == :world
+  end
 end
