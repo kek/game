@@ -10,3 +10,9 @@
 
 (deftest example_square-test
   (is-equal 64 (newlfe:example_square 8)))
+
+ (deftest example_square-test2
+    (is-equal 'world (Elixir.Game:hello)))
+
+ (deftest example_square-test3
+   (is-equal 'world (newlfe:foo)))
