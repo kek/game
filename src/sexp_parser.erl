@@ -1,12 +1,12 @@
 -module(sexp_parser).
 -export([parse/1, parse_and_scan/1, format_error/1]).
--file("src/sexp_parser.yrl", 35).
+-file("src/sexp_parser.yrl", 37).
 
 -define(l2i(L), list_to_integer(L)).
 value_of({_,_,V}) -> V.
 
 
--file("/home/ke/.asdf/installs/erlang/21.2.2/lib/parsetools-2.1.8/include/yeccpre.hrl", 0).
+-file("/home/ke/.asdf/installs/erlang/21.2.4/lib/parsetools-2.1.8/include/yeccpre.hrl", 0).
 %%
 %% %CopyrightBegin%
 %%
@@ -366,7 +366,7 @@ yeccgoto_expr(9, Cat, Ss, Stack, T, Ts, Tzr) ->
  yeccpars2_5(5, Cat, Ss, Stack, T, Ts, Tzr).
 
 -compile({inline,yeccpars2_5_/1}).
--file("src/sexp_parser.yrl", 23).
+-file("src/sexp_parser.yrl", 24).
 yeccpars2_5_(__Stack0) ->
  [__1 | __Stack] = __Stack0,
  [begin
@@ -374,7 +374,7 @@ yeccpars2_5_(__Stack0) ->
   end | __Stack].
 
 -compile({inline,yeccpars2_7_/1}).
--file("src/sexp_parser.yrl", 19).
+-file("src/sexp_parser.yrl", 20).
 yeccpars2_7_(__Stack0) ->
  [__3,__2,__1 | __Stack] = __Stack0,
  [begin
@@ -383,7 +383,7 @@ yeccpars2_7_(__Stack0) ->
 
 -file("src/sexp_parser.erl", 384).
 -compile({inline,yeccpars2_8_/1}).
--file("src/sexp_parser.yrl", 27).
+-file("src/sexp_parser.yrl", 28).
 yeccpars2_8_(__Stack0) ->
  [__1 | __Stack] = __Stack0,
  [begin
@@ -391,7 +391,7 @@ yeccpars2_8_(__Stack0) ->
   end | __Stack].
 
 -compile({inline,yeccpars2_9_/1}).
--file("src/sexp_parser.yrl", 25).
+-file("src/sexp_parser.yrl", 26).
 yeccpars2_9_(__Stack0) ->
  [__1 | __Stack] = __Stack0,
  [begin
@@ -399,7 +399,7 @@ yeccpars2_9_(__Stack0) ->
   end | __Stack].
 
 -compile({inline,yeccpars2_10_/1}).
--file("src/sexp_parser.yrl", 26).
+-file("src/sexp_parser.yrl", 27).
 yeccpars2_10_(__Stack0) ->
  [__2,__1 | __Stack] = __Stack0,
  [begin
@@ -408,7 +408,7 @@ yeccpars2_10_(__Stack0) ->
 
 -file("src/sexp_parser.erl", 409).
 -compile({inline,yeccpars2_11_/1}).
--file("src/sexp_parser.yrl", 28).
+-file("src/sexp_parser.yrl", 30).
 yeccpars2_11_(__Stack0) ->
  [__2,__1 | __Stack] = __Stack0,
  [begin
@@ -416,7 +416,7 @@ yeccpars2_11_(__Stack0) ->
   end | __Stack].
 
 -compile({inline,yeccpars2_12_/1}).
--file("src/sexp_parser.yrl", 17).
+-file("src/sexp_parser.yrl", 18).
 yeccpars2_12_(__Stack0) ->
  [__4,__3,__2,__1 | __Stack] = __Stack0,
  [begin
@@ -424,7 +424,7 @@ yeccpars2_12_(__Stack0) ->
   end | __Stack].
 
 -compile({inline,yeccpars2_13_/1}).
--file("src/sexp_parser.yrl", 24).
+-file("src/sexp_parser.yrl", 25).
 yeccpars2_13_(__Stack0) ->
  [__2,__1 | __Stack] = __Stack0,
  [begin
@@ -432,7 +432,7 @@ yeccpars2_13_(__Stack0) ->
   end | __Stack].
 
 -compile({inline,yeccpars2_15_/1}).
--file("src/sexp_parser.yrl", 18).
+-file("src/sexp_parser.yrl", 19).
 yeccpars2_15_(__Stack0) ->
  [__3,__2,__1 | __Stack] = __Stack0,
  [begin
@@ -440,7 +440,7 @@ yeccpars2_15_(__Stack0) ->
   end | __Stack].
 
 -compile({inline,yeccpars2_16_/1}).
--file("src/sexp_parser.yrl", 16).
+-file("src/sexp_parser.yrl", 17).
 yeccpars2_16_(__Stack0) ->
  [__4,__3,__2,__1 | __Stack] = __Stack0,
  [begin
@@ -448,4 +448,4 @@ yeccpars2_16_(__Stack0) ->
   end | __Stack].
 
 
--file("src/sexp_parser.yrl", 40).
+-file("src/sexp_parser.yrl", 42).

@@ -1,5 +1,7 @@
 defmodule SexpTest do
   use ExUnit.Case
+  import Game.Sexp
+  doctest Game.Sexp
 
   test "lexer" do
     assert {:ok,
@@ -18,31 +20,6 @@ defmodule SexpTest do
 
     assert {:ok, {:expr, '+', [{:digit, 1}, {:digit, 2}, {:expr, '-', [{:digit, 3}]}]}} =
              :sexp_parser.parse(tokens)
-  end
-
-  test "parse operator without argument" do
-    assert {:ok, tokens, _} = :sexp_lexer.string('(+)')
-    assert {:ok, _} = :sexp_parser.parse(tokens)
-  end
-
-  test "parse symbols" do
-    assert {:ok, tokens, _} = :sexp_lexer.string('(f)')
-    assert {:ok, _} = :sexp_parser.parse(tokens)
-  end
-
-  test "parse symbols with digit arguments" do
-    assert {:ok, tokens, _} = :sexp_lexer.string('(f 1)')
-    assert {:ok, _} = :sexp_parser.parse(tokens)
-  end
-
-  test "parse symbols as arguments" do
-    assert {:ok, tokens, _} = :sexp_lexer.string('(f x 1 y)')
-    assert {:ok, _} = :sexp_parser.parse(tokens)
-  end
-
-  test "parse nested list" do
-    assert {:ok, tokens, _} = :sexp_lexer.string('(a (b) c)')
-    assert {:ok, _} = :sexp_parser.parse(tokens)
   end
 
   # test "parse a string" do

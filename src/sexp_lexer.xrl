@@ -6,7 +6,7 @@ Whitespace  = [\000-\s]
 Symbol      = [a-z]+
 LeftParen   = \(
 RightParen  = \)
-DoubleQuote = \"
+%% DoubleQuote = \"
 %% Text        = [^\"]*
 
 Rules.
@@ -17,7 +17,7 @@ Rules.
 {RightParen}  : {token, {close, TokenLine, TokenChars}}.
 {Number}      : {token, {digit, TokenLine, TokenChars}}.
 {Symbol}      : {token, {symbol, TokenLine, TokenChars}}.
-{DoubleQuote} : {token, {double_quote, TokenLine, TokenChars}}.
+%% {DoubleQuote} : {token, {double_quote, TokenLine, TokenChars}}.
 %% {Text}        : {token, {text, TokenLine, TokenChars}}.
 
 Erlang code.
