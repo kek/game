@@ -4,24 +4,22 @@ defmodule Game.Sexp do
 
   Examples:
 
-  iex> parse("(+ 1 2)")
-  {:expr, '+', [digit: 1, digit: 2]}
-
-  iex> parse("(+)")
-  {:expr, {:operator, 1, '+'}}
-  iex> parse("(f)")
-  {:expr, {:symbol, 1, 'f'}}
-  iex> parse("(f 1)")
-  {:expr, {:symbol, 1, 'f'}, [digit: 1]}
-  iex> parse("(f x 1 y)")
-  {:expr, {:symbol, 1, 'f'},
-          [{:symbol, 1, 'x'},
-           {:digit, 1},
-           {:symbol, 1, 'y'}]}
-  iex> parse("(a (b) c)")
-  {:expr, {:symbol, 1, 'a'},
-          [{:expr, {:symbol, 1, 'b'}},
-           {:symbol, 1, 'c'}]}
+  iex> parse("(steve!)")
+  [{:atom, 1, 'steve!'}]
+  iex> parse("(steve! steve!)")
+  [{:atom, 1, 'steve!'}, {:atom, 1, 'steve!'}]
+  iex> parse("(steve! (steve!))")
+  [{:atom, 1, 'steve!'}, [{:atom, 1, 'steve!'}]]
+  iex> parse("(steve! (steve! steve!))")
+  [{:atom, 1, 'steve!'}, [{:atom, 1, 'steve!'}, {:atom, 1, 'steve!'}]]
+  iex> parse("(steve! (steve! steve!) steve!)")
+  [{:atom, 1, 'steve!'}, [{:atom, 1, 'steve!'}, {:atom, 1, 'steve!'}], {:atom, 1, 'steve!'}]
+  iex> parse("(42)")
+  [{:number, 1, 42}]
+  iex> parse("(+ - / * % $ & = \\\\)")
+  [{:operator, 1, '+'}, {:operator, 1, '-'}, {:operator, 1, '/'}, {:operator, 1, '*'}, {:operator, 1, '%'}, {:operator, 1, '$'}, {:operator, 1, '&'}, {:operator, 1, '='}, {:operator, 1, '\\\\'}]
+  iex> parse("(snake_man)")
+  [{:atom, 1, 'snake_man'}]
   """
   def parse(code) do
     with {:ok, tokens, _} <- code |> String.to_charlist() |> :sexp_lexer.string(),

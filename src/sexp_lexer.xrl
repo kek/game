@@ -1,22 +1,22 @@
 Definitions.
 
-Operator    = [+\-]
-Number      = [0-9]+
 Whitespace  = [\000-\s]
-Symbol      = [a-z]+
+Chars       = [a-z!?_]+
 LeftParen   = \(
 RightParen  = \)
+Number      = [0-9]+
+Operator    = [+\-/*%$&=\\]
 %% DoubleQuote = \"
 %% Text        = [^\"]*
 
 Rules.
 
 {Whitespace}  : skip_token.
+{LeftParen}   : {token, {'(', TokenLine}}.
+{RightParen}  : {token, {')', TokenLine}}.
+{Chars}       : {token, {atom, TokenLine, TokenChars}}.
+{Number}      : {token, {number, TokenLine, TokenChars}}.
 {Operator}    : {token, {operator, TokenLine, TokenChars}}.
-{LeftParen}   : {token, {open, TokenLine, TokenChars}}.
-{RightParen}  : {token, {close, TokenLine, TokenChars}}.
-{Number}      : {token, {digit, TokenLine, TokenChars}}.
-{Symbol}      : {token, {symbol, TokenLine, TokenChars}}.
 %% {DoubleQuote} : {token, {double_quote, TokenLine, TokenChars}}.
 %% {Text}        : {token, {text, TokenLine, TokenChars}}.
 
