@@ -1,12 +1,14 @@
 Nonterminals
 expr
 arg_list
+item
 .
 
 
 Terminals
 operator
 digit
+symbol
 '('
 ')'
 .
@@ -14,6 +16,7 @@ digit
 Rootsymbol expr.
 
 expr -> '(' operator arg_list ')' : {expr, value_of('$2'), '$3'}.
+expr -> '(' symbol arg_list ')' : {expr, '$2', '$3'}.
 
 arg_list -> expr : ['$1'].
 arg_list -> digit : [{digit, ?l2i(value_of('$1'))}].

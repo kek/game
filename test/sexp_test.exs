@@ -21,6 +21,9 @@ defmodule SexpTest do
   end
 
   test "parse symbols" do
-    assert {:ok, tokens, _} = :sexp_lexer.string('(f x)')
+    assert {:ok, tokens, _} = :sexp_lexer.string('(f 1)')
+    IO.inspect(tokens)
+
+    assert {:ok, _} = :sexp_parser.parse(tokens) |> IO.inspect()
   end
 end
