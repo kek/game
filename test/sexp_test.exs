@@ -44,4 +44,12 @@ defmodule SexpTest do
     assert {:ok, tokens, _} = :sexp_lexer.string('(a (b) c)')
     assert {:ok, _} = :sexp_parser.parse(tokens)
   end
+
+  # test "parse a string" do
+  #   assert {:ok, tokens, _} =
+  #            :sexp_lexer.string('(print "hej")')
+  #            |> IO.inspect()
+
+  #   assert {:ok, _} = :sexp_parser.parse(tokens)
+  # end
 end
