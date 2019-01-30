@@ -1,4 +1,3 @@
-
 Definitions.
 
 Operator   = [+\-]
@@ -12,8 +11,8 @@ Rules.
 
 {Whitespace} : skip_token.
 {Operator}   : {token, {operator, TokenLine, TokenChars}}.
-{LeftParen}  : {token, {'(', TokenLine, TokenChars}}.
-{RightParen} : {token, {')', TokenLine, TokenChars}}.
+{LeftParen}  : {token, {open, TokenLine, TokenChars}}.
+{RightParen} : {token, {close, TokenLine, TokenChars}}.
 {Number}     : {token, {digit, TokenLine, TokenChars}}.
 {Symbol}     : {token, {symbol, TokenLine, TokenChars}}.
 

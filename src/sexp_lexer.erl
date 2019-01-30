@@ -12,7 +12,7 @@
 -export([format_error/1]).
 
 %% User code. This is placed here to allow extra attributes.
--file("src/sexp_lexer.xrl", 20).
+-file("src/sexp_lexer.xrl", 19).
 
 -file("/home/ke/.asdf/installs/erlang/21.2.2/lib/parsetools-2.1.8/include/leexinc.hrl", 14).
 
@@ -371,32 +371,32 @@ yyaction(5, TokenLen, YYtcs, TokenLine) ->
 yyaction(_, _, _, _) -> error.
 
 -compile({inline,yyaction_0/0}).
--file("src/sexp_lexer.xrl", 11).
+-file("src/sexp_lexer.xrl", 10).
 yyaction_0() ->
      skip_token .
 
 -compile({inline,yyaction_1/2}).
--file("src/sexp_lexer.xrl", 12).
+-file("src/sexp_lexer.xrl", 11).
 yyaction_1(TokenChars, TokenLine) ->
      { token, { operator, TokenLine, TokenChars } } .
 
 -compile({inline,yyaction_2/2}).
--file("src/sexp_lexer.xrl", 13).
+-file("src/sexp_lexer.xrl", 12).
 yyaction_2(TokenChars, TokenLine) ->
-     { token, { '(', TokenLine, TokenChars } } .
+     { token, { open, TokenLine, TokenChars } } .
 
 -compile({inline,yyaction_3/2}).
--file("src/sexp_lexer.xrl", 14).
+-file("src/sexp_lexer.xrl", 13).
 yyaction_3(TokenChars, TokenLine) ->
-     { token, { ')', TokenLine, TokenChars } } .
+     { token, { close, TokenLine, TokenChars } } .
 
 -compile({inline,yyaction_4/2}).
--file("src/sexp_lexer.xrl", 15).
+-file("src/sexp_lexer.xrl", 14).
 yyaction_4(TokenChars, TokenLine) ->
      { token, { digit, TokenLine, TokenChars } } .
 
 -compile({inline,yyaction_5/2}).
--file("src/sexp_lexer.xrl", 16).
+-file("src/sexp_lexer.xrl", 15).
 yyaction_5(TokenChars, TokenLine) ->
      { token, { symbol, TokenLine, TokenChars } } .
 
