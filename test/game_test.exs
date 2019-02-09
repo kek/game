@@ -3,10 +3,6 @@ defmodule GameTest do
   doctest Game
   require Logger
 
-  test "lfe" do
-    assert :newlfe.example_square(8) == 64
-  end
-
   test "greets the world" do
     port = Application.get_env(:game, :port)
     {:ok, socket} = :gen_tcp.connect('localhost', port, [])
@@ -20,9 +16,5 @@ defmodule GameTest do
     end
 
     :ok = :gen_tcp.close(socket)
-  end
-
-  test "call LFE function" do
-    assert :newlfe.foo() == :world
   end
 end
