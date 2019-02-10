@@ -9,16 +9,24 @@ defmodule Game.Server do
   end
 
   def init(port) do
-    {:ok, listening_socket} = :gen_tcp.listen(port, [])
-    Logger.info("listening #{inspect(listening_socket)}")
+    Logger.info("#{__MODULE__} started at #{inspect(self())}")
 
-    {:ok, %State{}, {:continue, listening_socket}}
+    case :gen_tcp.listen(port, []) do
+      {:ok, listening_socket} ->
+        Logger.info("listening at socket #{inspect(listening_socket)}")
+        {:ok, %State{}, {:continue, listening_socket}}
+
+      {:error, :eaddrinuse} ->
+        Logger.info("Port #{port} in use, waiting...")
+        Process.sleep(1000)
+        init(port)
+    end
   end
 
   def handle_continue(listening_socket, state = %State{}) do
     {:ok, socket} = :gen_tcp.accept(listening_socket)
     Logger.info("connected #{inspect(socket)}")
-    :ok = :gen_tcp.controlling_process(socket, Conversation.start_link())
+    :ok = :gen_tcp.controlling_process(socket, Conversation.start())
 
     {:noreply, state, {:continue, listening_socket}}
   end

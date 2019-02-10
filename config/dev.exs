@@ -1,3 +1,5 @@
 use Mix.Config
 
-config :mix_test_watch, :extra_extensions, [".lfe"]
+config :logger,
+  handle_sasl_reports: true,
+  handle_otp_reports: true

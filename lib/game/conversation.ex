@@ -4,11 +4,12 @@ defmodule Game.Conversation do
   require Logger
 
   def init(args) do
+    Logger.info("#{__MODULE__} started at #{inspect(self())}")
     {:ok, args}
   end
 
-  def start_link do
-    {:ok, pid} = GenServer.start_link(__MODULE__, [])
+  def start do
+    {:ok, pid} = GenServer.start(__MODULE__, [])
     pid
   end
 
