@@ -1,13 +1,14 @@
 defmodule Game.Conversation do
   use GenServer
-  alias Game.{Commands, Player}
+  alias Game.{Commands, Player, World}
   require Logger
 
   defstruct me: nil, socket: nil
 
   def init([socket]) do
     Logger.info("#{__MODULE__} started at #{inspect(self())}")
-    {:ok, player} = Player.start_link()
+    player = World.create_player()
+    Process.link(player)
     state = %__MODULE__{socket: socket, me: player}
     player_name = Player.name(player)
     Logger.info("#{inspect(state)} logged in: #{player_name}")
