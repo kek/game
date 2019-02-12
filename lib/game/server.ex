@@ -18,7 +18,7 @@ defmodule Game.Server do
 
       {:error, :eaddrinuse} ->
         Logger.info("Port #{port} in use, waiting...")
-        Process.sleep(1000)
+        Process.sleep(5000)
         init(port)
     end
   end
@@ -26,7 +26,8 @@ defmodule Game.Server do
   def handle_continue(listening_socket, state = %State{}) do
     {:ok, socket} = :gen_tcp.accept(listening_socket)
     Logger.info("connected #{inspect(socket)}")
-    :ok = :gen_tcp.controlling_process(socket, Conversation.start())
+    {:ok, conversation} = Conversation.start(socket)
+    :ok = :gen_tcp.controlling_process(socket, conversation)
 
     {:noreply, state, {:continue, listening_socket}}
   end
