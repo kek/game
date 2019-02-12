@@ -18,9 +18,17 @@ defmodule Game.World do
     GenServer.call(__MODULE__, {:create_player})
   end
 
+  def players() do
+    GenServer.call(__MODULE__, {:players})
+  end
+
   def handle_call({:create_player}, _from, state) do
     {:ok, player} = Player.start_link()
     state = %{state | players: [player | state.players]}
     {:reply, player, state}
+  end
+
+  def handle_call({:players}, _from, state) do
+    {:reply, state.players, state}
   end
 end

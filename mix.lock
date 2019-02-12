@@ -5,5 +5,5 @@
   "mix_test_watch": {:hex, :mix_test_watch, "0.9.0", "c72132a6071261893518fa08e121e911c9358713f62794a90c95db59042af375", [:mix], [{:file_system, "~> 0.2.1 or ~> 0.3", [hex: :file_system, repo: "hexpm", optional: false]}], "hexpm"},
   "observer_cli": {:hex, :observer_cli, "1.4.1", "8c829bb28e3f316a361216314405fe296d8dd2fd7409dfa53fa4ac1cff3797a0", [:rebar3], [{:recon, "2.3.6", [hex: :recon, repo: "hexpm", optional: false]}], "hexpm"},
   "recon": {:hex, :recon, "2.3.6", "2bcad0cf621fb277cabbb6413159cd3aa30265c2dee42c968697988b30108604", [:rebar3], [], "hexpm"},
-  "symbelix": {:git, "https://github.com/kek/symbelix.git", "27ba65806ce9b5f3f08fdf1d2436b29a5cf7b485", []},
+  "symbelix": {:git, "https://github.com/kek/symbelix.git", "920c93354e287ae8b23c4cc6d511e44edd7c6acd", []},
 }

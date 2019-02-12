@@ -39,8 +39,8 @@ defmodule Game.Conversation do
     {:stop, :normal, state}
   end
 
-  defp perform(state, session, message) do
-    Logger.info("got #{message} from #{inspect(session)}")
+  defp perform(_state, socket, message) do
+    Logger.info("got #{message} from #{inspect(socket)}")
 
     program =
       if message =~ ~r/^\(.*\)$/ do
@@ -50,14 +50,14 @@ defmodule Game.Conversation do
       end
 
     if message =~ ~r/^\W*$/ do
-      output(session, "no input")
+      output(socket, "no input")
     else
       # ensure Commands is loaded for Symbelix.run
       Commands.load()
 
       result = Symbelix.run(program, Commands)
 
-      output(session, "#{program} -> #{inspect(result)}")
+      output(socket, "#{program} -> #{inspect(result)}")
     end
   end
 end
