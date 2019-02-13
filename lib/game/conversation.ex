@@ -7,12 +7,13 @@ defmodule Game.Conversation do
 
   def init([socket]) do
     Logger.info("#{__MODULE__} started at #{inspect(self())}")
-    player = World.create_player()
+    player = World.create_player(socket)
     Process.link(player)
     state = %__MODULE__{socket: socket, me: player}
     player_name = Player.name(player)
     Logger.info("#{inspect(state)} logged in: #{player_name}")
     output(socket, "You are now known as #{player_name}.")
+    output(socket, "Player: #{inspect(player)}. Conversation: #{inspect(self())}.")
     {:ok, state}
   end
 
@@ -21,7 +22,7 @@ defmodule Game.Conversation do
   end
 
   def output(socket, string, options \\ [newline: true]) do
-    :gen_tcp.send(socket, String.to_charlist(string))
+    :ok = :gen_tcp.send(socket, String.to_charlist(string))
 
     if options[:newline] == true do
       :gen_tcp.send(socket, '\n')
@@ -39,7 +40,7 @@ defmodule Game.Conversation do
     {:stop, :normal, state}
   end
 
-  defp perform(_state, socket, message) do
+  defp perform(state, socket, message) do
     Logger.info("got #{message} from #{inspect(socket)}")
 
     program =
@@ -52,12 +53,7 @@ defmodule Game.Conversation do
     if message =~ ~r/^\W*$/ do
       output(socket, "no input")
     else
-      # ensure Commands is loaded for Symbelix.run
-      Commands.load()
-
-      result = Symbelix.run(program, Commands)
-
-      output(socket, "#{program} -> #{inspect(result)}")
+      Player.perform(state.me, program)
     end
   end
 end
