@@ -33,6 +33,6 @@ defmodule Game.Server do
   end
 
   def start_link(port) do
-    GenServer.start_link(__MODULE__, port, name: __MODULE__)
+    GenServer.start_link(__MODULE__, port, name: __MODULE__, debug: [:trace])
   end
 end

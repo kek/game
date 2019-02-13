@@ -13,12 +13,11 @@ defmodule Game.Conversation do
     player_name = Player.name(player)
     Logger.info("#{inspect(state)} logged in: #{player_name}")
     output(socket, "You are now known as #{player_name}.")
-    output(socket, "Player: #{inspect(player)}. Conversation: #{inspect(self())}.")
     {:ok, state}
   end
 
   def start(socket) do
-    GenServer.start(__MODULE__, [socket])
+    GenServer.start(__MODULE__, [socket], debug: [:trace])
   end
 
   def output(socket, string, options \\ [newline: true]) do

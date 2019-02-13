@@ -6,7 +6,7 @@ defmodule Game.Player do
   defstruct name: nil, socket: nil
 
   def start_link(socket) do
-    GenServer.start_link(__MODULE__, [socket])
+    GenServer.start_link(__MODULE__, [socket], debug: [:trace])
   end
 
   def init([socket]) do
@@ -19,24 +19,15 @@ defmodule Game.Player do
     if pid == self() do
       "you"
     else
-      Logger.info("CALL: #{inspect(self())} Player name #{inspect(pid)} - player.ex name")
       GenServer.call(pid, {:name})
     end
   end
 
   def notify(pid, {:saying, from, saying}) do
-    if pid == self() do
-      Logger.info("#{inspect(self())} tried to Player.notify itself \"#{saying}\"!")
-    else
-      GenServer.cast(pid, {:notify, {:saying, from, saying}})
-    end
+    GenServer.cast(pid, {:notify, {:saying, from, saying}})
   end
 
   def perform(pid, program) do
-    Logger.info(
-      "CALL: #{inspect(self)} Player perform to #{inspect(pid)} #{program} - player.ex perform"
-    )
-
     GenServer.call(pid, {:perform, program})
   end
 

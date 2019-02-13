@@ -6,7 +6,7 @@ defmodule Game.World do
   defstruct players: []
 
   def start_link([]) do
-    GenServer.start_link(__MODULE__, [], name: __MODULE__)
+    GenServer.start_link(__MODULE__, [], name: __MODULE__, debug: [:trace])
   end
 
   def init([]) do

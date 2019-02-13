@@ -15,19 +15,7 @@ defmodule Game.Commands do
 
     Game.World.players()
     |> Enum.map(fn player ->
-      Logger.info(inspect({player, self()}))
-
-      if player == self() do
-        Logger.info("it's me!")
-      else
-        Logger.info(
-          "CALL: #{inspect(self())} Player notify #{inspect({:saying, saying})} to #{
-            inspect(player)
-          }- commands.ex say"
-        )
-
-        Game.Player.notify(player, {:saying, self(), saying})
-      end
+      Game.Player.notify(player, {:saying, self(), saying})
     end)
 
     "You say #{saying}."
