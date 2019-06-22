@@ -59,18 +59,18 @@ defmodule Game.Player do
     try do
       case Symbelix.run(program, Commands) do
         {:error, message} ->
-          "Error: #{inspect(program)} -> #{inspect(message)}"
+          "Error: #{message}"
 
         result ->
-          "#{inspect(program)} -> #{inspect(result)}"
+          "#{result}"
       end
     rescue
       error in MatchError ->
         %MatchError{term: {:error, message}} = error
-        "Error: #{inspect(program)} -> #{inspect(message)}"
+        "Error: #{message}"
 
       error ->
-        "Unexpected error: #{inspect(program)} -> #{inspect(error)}"
+        "Unexpected error: #{inspect(error)}"
     end
   end
 end

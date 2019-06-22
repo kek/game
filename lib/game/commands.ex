@@ -10,8 +10,9 @@ defmodule Game.Commands do
     "say something"
   end
 
-  def say(saying) do
-    Logger.info("someone says #{inspect(saying)}!")
+  def say(words) do
+    saying = Enum.join(words, " ")
+    Logger.info("someone says #{saying}!")
 
     Game.World.players()
     |> Enum.map(fn player ->
@@ -21,7 +22,7 @@ defmodule Game.Commands do
     "You say #{inspect(saying)}."
   end
 
-  def who() do
+  def who([]) do
     Game.World.players()
     |> Enum.map(fn player ->
       if player == self() do
@@ -33,7 +34,7 @@ defmodule Game.Commands do
     end)
   end
 
-  def foreach(list, function) do
+  def foreach([list, function]) do
     list
     |> Enum.map(fn item ->
       {:ok, ast} = generate_ast([function, item])
