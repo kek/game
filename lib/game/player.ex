@@ -67,7 +67,7 @@ defmodule Game.Player do
     rescue
       error in MatchError ->
         %MatchError{term: {:error, message}} = error
-        "Error: #{message}"
+        "Match error: #{message}"
 
       error ->
         "Unexpected error: #{inspect(error)}"
