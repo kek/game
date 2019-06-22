@@ -11,14 +11,14 @@ defmodule Game.Commands do
   end
 
   def say(saying) do
-    Logger.info("someone says #{saying}!")
+    Logger.info("someone says #{inspect(saying)}!")
 
     Game.World.players()
     |> Enum.map(fn player ->
       Game.Player.notify(player, {:saying, self(), saying})
     end)
 
-    "You say #{saying}."
+    "You say #{inspect(saying)}."
   end
 
   def who() do

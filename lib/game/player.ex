@@ -33,11 +33,9 @@ defmodule Game.Player do
 
   def handle_call({:perform, program}, _, state) do
     # ensure Commands is loaded for Symbelix.run
-    Commands.load()
+    message = run(program)
 
-    result = Symbelix.run(program, Commands)
-
-    Conversation.output(state.socket, "#{program} -> #{inspect(result)}")
+    Conversation.output(state.socket, "#{program} -> #{message}")
 
     {:reply, :ok, state}
   end
@@ -49,7 +47,30 @@ defmodule Game.Player do
   def handle_cast({:notify, {:saying, from, saying}}, state) do
     player_name = Player.name(from)
 
-    Conversation.output(state.socket, "#{player_name}: #{saying}")
+    Conversation.output(state.socket, "#{player_name}: #{inspect(saying)}")
     {:noreply, state}
+  end
+
+  defp run(program) do
+    Logger.info("Running #{inspect(program)}")
+
+    Commands.load()
+
+    try do
+      case Symbelix.run(program, Commands) do
+        {:error, message} ->
+          "Error: #{inspect(program)} -> #{inspect(message)}"
+
+        result ->
+          "#{inspect(program)} -> #{inspect(result)}"
+      end
+    rescue
+      error in MatchError ->
+        %MatchError{term: {:error, message}} = error
+        "Error: #{inspect(program)} -> #{inspect(message)}"
+
+      error ->
+        "Unexpected error: #{inspect(program)} -> #{inspect(error)}"
+    end
   end
 end

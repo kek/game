@@ -1,6 +1,6 @@
 defmodule Game.Conversation do
   use GenServer
-  alias Game.{Commands, Player, World}
+  alias Game.{Player, World}
   require Logger
 
   defstruct me: nil, socket: nil
