@@ -57,6 +57,7 @@ defmodule Game.Conversation do
     player_name = Player.name(player)
     Logger.info("#{inspect(state)} logged in: #{player_name}")
     do_output(socket, "You are now known as #{player_name}.")
+    Player.prompt(player)
     {:ok, state}
   end
 
