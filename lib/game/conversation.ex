@@ -5,7 +5,45 @@ defmodule Game.Conversation do
 
   defmodule Command do
     def perform(me, input) do
-      Player.perform(me, input)
+      if input =~ ~r/^\s*$/ do
+        Logger.debug("no input")
+      else
+        input =
+          if input =~ ~r/^\(.*\)$/ do
+            input
+          else
+            "(#{input})"
+          end
+
+        Player.perform(me, input)
+      end
+    end
+
+    def intro() do
+      "Command mode"
+    end
+
+    def prompt() do
+      "> "
+    end
+  end
+
+  defmodule Editor do
+    def perform(player, ".") do
+      Logger.debug("Exiting editor")
+      Player.change_mode(player, Command)
+    end
+
+    def perform(me, line) do
+      Player.notify(me, {:saying, me, "ok #{line}"})
+    end
+
+    def intro() do
+      "Edit mode"
+    end
+
+    def prompt() do
+      ":"
     end
   end
 
@@ -28,6 +66,34 @@ defmodule Game.Conversation do
 
   def output(conversation, string, options \\ [newline: true]) do
     GenServer.cast(conversation, {:output, string, options})
+  end
+
+  def change_mode(conversation, mode) do
+    GenServer.call(conversation, {:change_mode, mode})
+  end
+
+  def prompt(conversation) do
+    GenServer.call(conversation, {:prompt})
+  end
+
+  def handle_call({:prompt}, _from, state) do
+    {:reply, state.mode.prompt(), state}
+  end
+
+  def handle_call({:change_mode, mode}, _from, state) when is_atom(mode) do
+    {:reply, :ok, %{state | mode: mode}}
+  end
+
+  def handle_call({:change_mode, mode}, _from, state) do
+    try do
+      mode = String.to_existing_atom(mode)
+      do_output(state.socket, "Switching to mode #{inspect(mode)}")
+      {:reply, :ok, %{state | mode: mode}}
+    rescue
+      error ->
+        do_output(state.socket, "#{inspect(mode)} not found")
+        {:reply, {:error, error}, state}
+    end
   end
 
   def handle_cast({:output, string, options}, state) do
@@ -54,20 +120,11 @@ defmodule Game.Conversation do
     {:stop, :normal, state}
   end
 
-  defp perform(state, socket, message) do
-    Logger.info("got #{message} from #{inspect(socket)}")
+  defp perform(state, socket, input) do
+    Logger.info("got #{input} from #{inspect(socket)}")
 
-    input =
-      if message =~ ~r/^\(.*\)$/ do
-        message
-      else
-        "(#{message})"
-      end
-
-    if message =~ ~r/^\W*$/ do
-      do_output(socket, "no input")
-    else
-      state.mode.perform(state.me, input)
-    end
+    Logger.debug("Performing #{input} for #{inspect(state.me)}")
+    state.mode.perform(state.me, String.trim(input))
+    Player.prompt(state.me)
   end
 end

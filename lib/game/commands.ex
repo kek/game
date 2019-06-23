@@ -1,6 +1,7 @@
 defmodule Game.Commands do
   use Symbelix.Library
   require Logger
+  alias Game.{Player, World}
 
   def load() do
     :ok
@@ -14,24 +15,32 @@ defmodule Game.Commands do
     saying = Enum.join(words, " ")
     Logger.info("someone says #{saying}!")
 
-    Game.World.players()
+    World.players()
     |> Enum.map(fn player ->
-      Game.Player.notify(player, {:saying, self(), saying})
+      Player.notify(player, {:saying, self(), saying})
     end)
 
     "You say #{inspect(saying)}."
   end
 
   def who([]) do
-    Game.World.players()
+    World.players()
     |> Enum.map(fn player ->
       if player == self() do
         "Me"
       else
         Logger.info("Asking name of #{inspect(player)}")
-        Game.Player.name(player)
+        Player.name(player)
       end
     end)
+  end
+
+  def mode([mode]) do
+    Player.change_mode(self(), mode)
+  end
+
+  def edit([]) do
+    Player.change_mode(self(), Game.Conversation.Editor)
   end
 
   def foreach([list, function]) do

@@ -31,17 +31,35 @@ defmodule Game.Player do
     GenServer.call(player, {:perform, program})
   end
 
+  def change_mode(player, mode) do
+    GenServer.cast(player, {:change_mode, mode})
+  end
+
+  def prompt(player) do
+    GenServer.cast(player, {:prompt})
+  end
+
   def handle_call({:perform, program}, _, state) do
     # ensure Commands is loaded for Symbelix.run
     message = run(program)
-
-    Conversation.output(state.conversation, "#{program} -> #{message}")
-
+    Conversation.output(state.conversation, "#{program} -> #{inspect(message)}")
     {:reply, :ok, state}
   end
 
   def handle_call({:name}, _from, state) do
     {:reply, state.name, state}
+  end
+
+  def handle_cast({:change_mode, mode}, state) do
+    Conversation.output(state.conversation, mode.intro)
+    Conversation.change_mode(state.conversation, mode)
+    {:noreply, state}
+  end
+
+  def handle_cast({:prompt}, state) do
+    prompt = Conversation.prompt(state.conversation)
+    Conversation.output(state.conversation, prompt, newline: false)
+    {:noreply, state}
   end
 
   def handle_cast({:notify, {:saying, from, saying}}, state) do
