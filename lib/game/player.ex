@@ -61,8 +61,11 @@ defmodule Game.Player do
         {:error, message} ->
           "Error: #{message}"
 
+        result when is_list(result) ->
+          Enum.join(result, ", ")
+
         result ->
-          "#{result}"
+          result
       end
     rescue
       error in MatchError ->
