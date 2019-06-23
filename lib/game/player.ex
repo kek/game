@@ -3,16 +3,16 @@ defmodule Game.Player do
   require Logger
   alias Game.{Conversation, Player, Commands}
 
-  defstruct name: nil, socket: nil
+  defstruct name: nil, conversation: nil
 
-  def start_link(socket) do
-    GenServer.start_link(__MODULE__, [socket], debug: [:trace])
+  def start_link(conversation) do
+    GenServer.start_link(__MODULE__, [conversation], debug: [:trace])
   end
 
-  def init([socket]) do
+  def init([conversation]) do
     name = Faker.Name.name()
     Logger.info("Started #{inspect(self())}: #{name}")
-    {:ok, %__MODULE__{socket: socket, name: name}}
+    {:ok, %__MODULE__{conversation: conversation, name: name}}
   end
 
   def name(pid) do
@@ -27,15 +27,15 @@ defmodule Game.Player do
     GenServer.cast(pid, {:notify, {:saying, from, saying}})
   end
 
-  def perform(pid, program) do
-    GenServer.call(pid, {:perform, program})
+  def perform(player, program) do
+    GenServer.call(player, {:perform, program})
   end
 
   def handle_call({:perform, program}, _, state) do
     # ensure Commands is loaded for Symbelix.run
     message = run(program)
 
-    Conversation.output(state.socket, "#{program} -> #{message}")
+    Conversation.output(state.conversation, "#{program} -> #{message}")
 
     {:reply, :ok, state}
   end
@@ -47,7 +47,7 @@ defmodule Game.Player do
   def handle_cast({:notify, {:saying, from, saying}}, state) do
     player_name = Player.name(from)
 
-    Conversation.output(state.socket, "#{player_name}: #{inspect(saying)}")
+    Conversation.output(state.conversation, "#{player_name}: #{inspect(saying)}")
     {:noreply, state}
   end
 
