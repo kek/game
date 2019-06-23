@@ -39,6 +39,10 @@ defmodule Game.Player do
     GenServer.cast(player, {:prompt})
   end
 
+  def log_off(player) do
+    Process.exit(player, :normal)
+  end
+
   def handle_call({:perform, program}, _, state) do
     # ensure Commands is loaded for Symbelix.run
     message = run(program)

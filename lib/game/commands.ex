@@ -52,4 +52,8 @@ defmodule Game.Commands do
       result
     end)
   end
+
+  def quit([]) do
+    Player.log_off(self())
+  end
 end
