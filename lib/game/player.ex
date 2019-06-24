@@ -5,8 +5,10 @@ defmodule Game.Player do
 
   defstruct name: nil, conversation: nil
 
+  @gen_server_options Application.get_env(:game, :gen_server_options) || []
+
   def start_link(conversation) do
-    GenServer.start_link(__MODULE__, [conversation], debug: [:trace])
+    GenServer.start_link(__MODULE__, [conversation], @gen_server_options)
   end
 
   def init([conversation]) do

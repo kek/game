@@ -62,7 +62,7 @@ defmodule Game.Conversation do
   end
 
   def start(socket) do
-    GenServer.start(__MODULE__, [socket], debug: [:trace])
+    GenServer.start(__MODULE__, [socket], @gen_server_options)
   end
 
   def output(conversation, string, options \\ [newline: true]) do

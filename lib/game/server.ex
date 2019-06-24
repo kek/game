@@ -1,8 +1,9 @@
 defmodule Game.Server do
   alias Game.Conversation
   require Logger
-
   use GenServer
+
+  @gen_server_options Application.get_env(:game, :gen_server_options) || []
 
   defmodule State do
     defstruct nothing: nil
@@ -33,6 +34,6 @@ defmodule Game.Server do
   end
 
   def start_link(port) do
-    GenServer.start_link(__MODULE__, port, name: __MODULE__, debug: [:trace])
+    GenServer.start_link(__MODULE__, port, Keyword.merge(@gen_server_options, name: __MODULE__))
   end
 end

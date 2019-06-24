@@ -5,8 +5,10 @@ defmodule Game.World do
 
   defstruct players: []
 
+  @gen_server_options Application.get_env(:game, :gen_server_options) || []
+
   def start_link([]) do
-    GenServer.start_link(__MODULE__, [], name: __MODULE__, debug: [:trace])
+    GenServer.start_link(__MODULE__, [], Keyword.merge(@gen_server_options, name: __MODULE__))
   end
 
   def init([]) do
