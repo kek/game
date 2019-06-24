@@ -222,7 +222,7 @@ defmodule Game.BufferingConversation do
 
   defp perform(state, socket, [255, operation, option] ++ input) do
     Logger.debug("got [IAC, #{@reverse_commands[operation]}, #{@reverse_options[option]}]")
-    perform(state, socket, input)
+    state.buffer ++ perform(state, socket, input)
   end
 
   defp perform(state, socket, [13, 0]) do
@@ -233,10 +233,13 @@ defmodule Game.BufferingConversation do
     []
   end
 
-  defp perform(state, socket, input) do
-    string = input |> List.to_string() |> String.trim()
-    :gen_tcp.send(socket, input)
-    Logger.debug("Got #{inspect(input)} \"#{string}\" from #{inspect(state.me)}")
-    state.buffer ++ input
+  defp perform(state, socket, [input | rest]) do
+    :gen_tcp.send(socket, [input])
+    Logger.debug("Got #{[input]} (#{input}) from #{inspect(state.me)}")
+    state.buffer ++ [input] ++ perform(state, socket, rest)
+  end
+
+  defp perform(_state, _socket, []) do
+    []
   end
 end
