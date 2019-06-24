@@ -40,7 +40,7 @@ defmodule Game.Commands do
   end
 
   def edit([]) do
-    Player.change_mode(self(), Game.Conversation.Editor)
+    Player.change_mode(self(), Game.Mode.Editor)
   end
 
   def foreach([list, function]) do

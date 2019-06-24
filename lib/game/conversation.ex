@@ -1,53 +1,11 @@
 defmodule Game.Conversation do
   use GenServer
-  alias Game.{Player, World, Command}
+  alias Game.{Player, World, Mode.Normal}
   require Logger
 
-  defmodule Command do
-    def perform(me, input) do
-      if input =~ ~r/^\s*$/ do
-        Logger.debug("no input")
-      else
-        input =
-          if input =~ ~r/^\(.*\)$/ do
-            input
-          else
-            "(#{input})"
-          end
+  @gen_server_options Application.get_env(:game, :gen_server_options) || []
 
-        Player.perform(me, input)
-      end
-    end
-
-    def intro() do
-      "Command mode"
-    end
-
-    def prompt() do
-      "> "
-    end
-  end
-
-  defmodule Editor do
-    def perform(player, ".") do
-      Logger.debug("Exiting editor")
-      Player.change_mode(player, Command)
-    end
-
-    def perform(me, line) do
-      Player.notify(me, {:saying, me, "ok #{line}"})
-    end
-
-    def intro() do
-      "Edit mode"
-    end
-
-    def prompt() do
-      ":"
-    end
-  end
-
-  defstruct me: nil, socket: nil, mode: Command
+  defstruct me: nil, socket: nil, mode: Normal
 
   def init([socket]) do
     Logger.info("#{__MODULE__} started at #{inspect(self())}")
