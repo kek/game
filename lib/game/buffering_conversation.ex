@@ -1,6 +1,6 @@
 defmodule Game.BufferingConversation do
   use GenServer
-  alias Game.{Player, World, Mode.Normal, Mode.Editor}
+  alias Game.{Player, World, Mode.Normal}
   require Logger
 
   @gen_server_options Application.get_env(:game, :gen_server_options) || []
@@ -14,7 +14,7 @@ defmodule Game.BufferingConversation do
     state = %__MODULE__{socket: socket, me: player}
     player_name = Player.name(player)
     Logger.info("#{inspect(state)} logged in: #{player_name}")
-    # set_character_at_a_time_mode(socket)
+    set_character_at_a_time_mode(socket)
     do_output(socket, "You are now known as #{player_name}.")
     Player.prompt(player)
     {:ok, state}
@@ -73,6 +73,8 @@ defmodule Game.BufferingConversation do
   end
 
   defp set_character_at_a_time_mode(socket) do
+    # // IAC WONT LINEMODE IAC WILL ECHO
+    # write(s,"\377\375\042\377\373\001",6);
     telnet_command = [0o377, 0o375, 0o042, 0o377, 0o373, 0o001] |> List.to_string()
     do_output(socket, telnet_command)
   end

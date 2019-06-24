@@ -1,11 +1,12 @@
 defmodule Game.Player do
   use GenServer
   require Logger
-  alias Game.{Conversation, Player, Commands}
+  alias Game.{Player, Commands}
 
   defstruct name: nil, conversation: nil
 
   @gen_server_options Application.get_env(:game, :gen_server_options) || []
+  @conversation Application.get_env(:game, :conversation)
 
   def start_link(conversation) do
     GenServer.start_link(__MODULE__, [conversation], @gen_server_options)
@@ -48,7 +49,7 @@ defmodule Game.Player do
   def handle_call({:perform, program}, _, state) do
     # ensure Commands is loaded for Symbelix.run
     message = run(program)
-    Conversation.output(state.conversation, "#{program} -> #{inspect(message)}")
+    @conversation.output(state.conversation, "#{program} -> #{inspect(message)}")
     {:reply, :ok, state}
   end
 
@@ -57,21 +58,21 @@ defmodule Game.Player do
   end
 
   def handle_cast({:change_mode, mode}, state) do
-    Conversation.output(state.conversation, mode.intro)
-    Conversation.change_mode(state.conversation, mode)
+    @conversation.output(state.conversation, mode.intro)
+    @conversation.change_mode(state.conversation, mode)
     {:noreply, state}
   end
 
   def handle_cast({:prompt}, state) do
-    prompt = Conversation.prompt(state.conversation)
-    Conversation.output(state.conversation, prompt, newline: false)
+    prompt = @conversation.prompt(state.conversation)
+    @conversation.output(state.conversation, prompt, newline: false)
     {:noreply, state}
   end
 
   def handle_cast({:notify, {:saying, from, saying}}, state) do
     player_name = Player.name(from)
 
-    Conversation.output(state.conversation, "#{player_name}: #{inspect(saying)}")
+    @conversation.output(state.conversation, "#{player_name}: #{inspect(saying)}")
     {:noreply, state}
   end
 

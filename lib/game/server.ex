@@ -1,9 +1,9 @@
 defmodule Game.Server do
-  alias Game.Conversation
   require Logger
   use GenServer
 
   @gen_server_options Application.get_env(:game, :gen_server_options) || []
+  @conversation Application.get_env(:game, :conversation)
 
   defmodule State do
     defstruct nothing: nil
@@ -27,7 +27,7 @@ defmodule Game.Server do
   def handle_continue(listening_socket, state = %State{}) do
     {:ok, socket} = :gen_tcp.accept(listening_socket)
     Logger.info("connected #{inspect(socket)}")
-    {:ok, conversation} = Conversation.start(socket)
+    {:ok, conversation} = @conversation.start(socket)
     :ok = :gen_tcp.controlling_process(socket, conversation)
 
     {:noreply, state, {:continue, listening_socket}}
