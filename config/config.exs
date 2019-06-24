@@ -25,7 +25,7 @@ config :game, :port, 5000
 
 config :game,
   gen_server_options: [],
-  conversation: Game.Conversation
+  conversation: Game.BufferingConversation
 
 # config :game, :gen_server_options, debug: [:trace]
 

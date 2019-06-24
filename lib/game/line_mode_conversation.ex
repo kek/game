@@ -1,4 +1,4 @@
-defmodule Game.Conversation do
+defmodule Game.LineModeConversation do
   use GenServer
   alias Game.{Player, World, Mode.Normal}
   require Logger
