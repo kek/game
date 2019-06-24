@@ -14,6 +14,7 @@ defmodule Game.Conversation do
     state = %__MODULE__{socket: socket, me: player}
     player_name = Player.name(player)
     Logger.info("#{inspect(state)} logged in: #{player_name}")
+    # set_character_at_a_time_mode(socket)
     do_output(socket, "You are now known as #{player_name}.")
     Player.prompt(player)
     {:ok, state}
@@ -61,11 +62,19 @@ defmodule Game.Conversation do
   end
 
   defp do_output(socket, string, options \\ [newline: true]) do
+    # debug = :gen_tcp.recv(socket, 1)
+    # IO.inspect(debug)
+    # :ok = :gen_tcp.send(socket, inspect(debug))
     :ok = :gen_tcp.send(socket, String.to_charlist(string))
 
     if options[:newline] == true do
       :gen_tcp.send(socket, '\n')
     end
+  end
+
+  defp set_character_at_a_time_mode(socket) do
+    telnet_command = [0o377, 0o375, 0o042, 0o377, 0o373, 0o001] |> List.to_string()
+    do_output(socket, telnet_command)
   end
 
   def handle_info({:tcp, socket, text}, state) do
