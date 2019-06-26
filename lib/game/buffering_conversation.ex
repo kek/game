@@ -1,6 +1,7 @@
 defmodule Game.BufferingConversation do
   use GenServer
-  alias Game.{Player, World, Mode.Normal}
+  alias Game.{Player, World}
+  alias Game.Mode.Normal
   require Logger
 
   @gen_server_options Application.get_env(:game, :gen_server_options) || []
@@ -133,8 +134,8 @@ defmodule Game.BufferingConversation do
     state = %__MODULE__{socket: socket, me: player}
     player_name = Player.name(player)
     Logger.info("#{inspect(state)} logged in: #{player_name}")
-    set_character_at_a_time_mode(socket)
-    do_output(socket, "You are now known as #{player_name}.")
+    set_character_at_a_time_mode(state)
+    do_output(state, "You are now known as #{player_name}.")
     Player.prompt(player)
     {:ok, state}
   end
@@ -170,43 +171,46 @@ defmodule Game.BufferingConversation do
       {:reply, :ok, %{state | mode: mode}}
     rescue
       error ->
-        do_output(state.socket, "#{inspect(mode)} not found")
+        do_output(state, "#{inspect(mode)} not found")
         {:reply, {:error, error}, state}
     end
   end
 
   def handle_cast({:output, string, options}, state) do
-    do_output(state.socket, string, options)
+    do_output(state, string, options)
     {:noreply, state}
   end
 
-  defp do_output(socket, string, options \\ [newline: true]) do
+  defp do_output(state, string, options \\ [newline: true]) do
     # debug = :gen_tcp.recv(socket, 1)
     # IO.inspect(debug)
     # :ok = :gen_tcp.send(socket, inspect(debug))
-    :ok = :gen_tcp.send(socket, String.to_charlist(string))
+    :ok = :gen_tcp.send(state.socket, String.to_charlist(string))
 
     if options[:newline] == true do
-      :gen_tcp.send(socket, '\r\n')
+      :gen_tcp.send(state.socket, '\r\n')
     end
   end
 
-  defp set_character_at_a_time_mode(socket) do
-    # // IAC WONT LINEMODE IAC WILL ECHO
-    # write(s,"\377\375\042\377\373\001",6);
-    # IAC WONT LINEMODE IAC DONT ECHO
+  defp set_character_at_a_time_mode(state) do
     telnet_command =
       [
         @commands["IAC"],
-        @commands["DO"],
-        @options["Linemode"],
+        @commands["WILL"],
+        @options["Echo"],
+        @commands["IAC"],
+        @commands["DONT"],
+        @options["Echo"],
         @commands["IAC"],
         @commands["WILL"],
-        @options["Echo"]
+        @options["Suppress Go Ahead"],
+        @commands["IAC"],
+        @commands["DO"],
+        @options["Suppress Go Ahead"]
       ]
       |> List.to_string()
 
-    do_output(socket, telnet_command)
+    do_output(state, telnet_command)
   end
 
   def handle_info({:tcp, socket, input}, state) do
