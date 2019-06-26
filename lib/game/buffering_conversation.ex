@@ -135,8 +135,8 @@ defmodule Game.BufferingConversation do
     player_name = Player.name(player)
     Logger.info("#{inspect(state)} logged in: #{player_name}")
     set_character_at_a_time_mode(state)
-    do_output(state, "You are now known as #{player_name}.")
-    Player.prompt(player)
+    :gen_tcp.send(state.socket, "You are now known as #{player_name}.\r\n")
+    :gen_tcp.send(state.socket, "> ")
     {:ok, state}
   end
 
@@ -185,32 +185,45 @@ defmodule Game.BufferingConversation do
     # debug = :gen_tcp.recv(socket, 1)
     # IO.inspect(debug)
     # :ok = :gen_tcp.send(socket, inspect(debug))
+
+    Logger.debug("Outputting #{string} with #{inspect(state)}")
+
+    state.buffer
+    |> Enum.each(fn _ ->
+      Logger.debug("Backing up")
+      :gen_tcp.send(state.socket, [8])
+    end)
+
+    :gen_tcp.send(state.socket, [8])
+    :gen_tcp.send(state.socket, [8])
+
     :ok = :gen_tcp.send(state.socket, String.to_charlist(string))
 
     if options[:newline] == true do
       :gen_tcp.send(state.socket, '\r\n')
     end
+
+    :gen_tcp.send(state.socket, '> ')
+    :gen_tcp.send(state.socket, state.buffer)
   end
 
   defp set_character_at_a_time_mode(state) do
-    telnet_command =
-      [
-        @commands["IAC"],
-        @commands["WILL"],
-        @options["Echo"],
-        @commands["IAC"],
-        @commands["DONT"],
-        @options["Echo"],
-        @commands["IAC"],
-        @commands["WILL"],
-        @options["Suppress Go Ahead"],
-        @commands["IAC"],
-        @commands["DO"],
-        @options["Suppress Go Ahead"]
-      ]
-      |> List.to_string()
+    telnet_command = [
+      @commands["IAC"],
+      @commands["WILL"],
+      @options["Echo"],
+      @commands["IAC"],
+      @commands["DONT"],
+      @options["Echo"],
+      @commands["IAC"],
+      @commands["WILL"],
+      @options["Suppress Go Ahead"],
+      @commands["IAC"],
+      @commands["DO"],
+      @options["Suppress Go Ahead"]
+    ]
 
-    do_output(state, telnet_command)
+    :gen_tcp.send(state.socket, telnet_command)
   end
 
   def handle_info({:tcp, socket, input}, state) do
@@ -229,11 +242,11 @@ defmodule Game.BufferingConversation do
     state.buffer ++ perform(state, socket, input)
   end
 
-  defp perform(state, socket, [13, 0]) do
+  defp perform(state, _socket, [13, 0]) do
     Logger.debug("Got CR")
-    :ok = :gen_tcp.send(socket, [@control_codes["CR"], @control_codes["LF"]])
+    :ok = :gen_tcp.send(state.socket, [@control_codes["CR"], @control_codes["LF"]])
     state.mode.perform(state.me, List.to_string(state.buffer))
-    Player.prompt(state.me)
+    :gen_tcp.send(state.socket, "> ")
     []
   end
 
