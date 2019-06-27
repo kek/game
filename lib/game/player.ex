@@ -30,8 +30,12 @@ defmodule Game.Player do
     GenServer.cast(pid, {:notify, {:saying, from, saying}})
   end
 
+  def notify(pid, text) do
+    GenServer.cast(pid, {:notify, text})
+  end
+
   def perform(player, program) do
-    GenServer.call(player, {:perform, program})
+    GenServer.cast(player, {:perform, program})
   end
 
   def change_mode(player, mode) do
@@ -46,20 +50,19 @@ defmodule Game.Player do
     Process.exit(player, :normal)
   end
 
-  def handle_call({:perform, program}, _, state) do
-    # ensure Commands is loaded for Symbelix.run
-    message = run(program)
-    @conversation.output(state.conversation, "#{program} -> #{inspect(message)}")
-    {:reply, :ok, state}
-  end
-
   def handle_call({:name}, _from, state) do
     {:reply, state.name, state}
   end
 
   def handle_cast({:change_mode, mode}, state) do
-    @conversation.output(state.conversation, mode.intro)
     @conversation.change_mode(state.conversation, mode)
+    {:noreply, state}
+  end
+
+  def handle_cast({:perform, program}, state) do
+    # ensure Commands is loaded for Symbelix.run
+    message = run(program)
+    @conversation.output(state.conversation, "#{program} -> #{inspect(message)}")
     {:noreply, state}
   end
 
@@ -73,6 +76,15 @@ defmodule Game.Player do
     player_name = Player.name(from)
 
     @conversation.output(state.conversation, "#{player_name}: #{inspect(saying)}")
+    {:noreply, state}
+  end
+
+  def handle_cast({:notify, ""}, state) do
+    {:noreply, state}
+  end
+
+  def handle_cast({:notify, text}, state) do
+    @conversation.output(state.conversation, text)
     {:noreply, state}
   end
 

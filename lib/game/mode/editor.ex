@@ -3,19 +3,24 @@ defmodule Game.Mode.Editor do
   alias Game.{Player, Mode.Normal}
 
   def perform(player, ".") do
+    lines = Process.get(:lines)
+    text = Enum.join(lines, "\n")
     Logger.debug("Exiting editor")
     Player.change_mode(player, Normal)
+    Player.notify(player, text)
   end
 
   def perform(me, line) do
-    Player.notify(me, {:saying, me, "ok #{line}"})
+    lines = Process.get(:lines)
+    Process.put(:lines, lines ++ [line])
   end
 
   def intro() do
-    "Edit mode"
+    Process.put(:lines, [])
+    "Edit mode. \".\" to end input"
   end
 
   def prompt() do
-    ":"
+    ": "
   end
 end

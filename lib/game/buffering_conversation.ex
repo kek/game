@@ -136,7 +136,7 @@ defmodule Game.BufferingConversation do
     Logger.info("#{inspect(state)} logged in: #{player_name}")
     set_character_at_a_time_mode(state)
     :gen_tcp.send(state.socket, "You are now known as #{player_name}.\r\n")
-    :gen_tcp.send(state.socket, state.mode.prompt())
+    :gen_tcp.send(state.socket, state.prompt)
     {:ok, state}
   end
 
@@ -145,7 +145,7 @@ defmodule Game.BufferingConversation do
   end
 
   def output(conversation, string, options \\ [newline: true]) do
-    GenServer.cast(conversation, {:output, string, options})
+    GenServer.call(conversation, {:output, string, options})
   end
 
   def change_mode(conversation, mode) do
@@ -161,14 +161,17 @@ defmodule Game.BufferingConversation do
   end
 
   def handle_call({:change_mode, mode}, _from, state) when is_atom(mode) do
-    {:reply, :ok, %{state | mode: mode}}
+    state = %{state | mode: mode, prompt: mode.prompt()}
+    do_output(state, mode.intro())
+    {:reply, :ok, state}
   end
 
   def handle_call({:change_mode, mode}, _from, state) do
     try do
       mode = String.to_existing_atom(mode)
-      do_output(state.socket, "Switching to mode #{inspect(mode)}")
-      {:reply, :ok, %{state | mode: mode, prompt: mode.prompt()}}
+      state = %{state | mode: mode, prompt: mode.prompt()}
+      do_output(state, "Switching to mode #{inspect(mode)}")
+      {:reply, :ok, state}
     rescue
       error ->
         do_output(state, "#{inspect(mode)} not found")
@@ -176,9 +179,9 @@ defmodule Game.BufferingConversation do
     end
   end
 
-  def handle_cast({:output, string, options}, state) do
+  def handle_call({:output, string, options}, _from, state) do
     do_output(state, string, options)
-    {:noreply, state}
+    {:reply, :ok, state}
   end
 
   defp do_output(state, string, options \\ [newline: true]) do
