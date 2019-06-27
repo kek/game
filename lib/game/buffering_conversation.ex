@@ -125,7 +125,7 @@ defmodule Game.BufferingConversation do
                    |> Enum.map(fn {key, value} -> {value, key} end)
                    |> Map.new()
 
-  defstruct me: nil, socket: nil, mode: Normal, buffer: []
+  defstruct me: nil, socket: nil, mode: Normal, buffer: [], prompt: "> "
 
   def init([socket]) do
     Logger.info("#{__MODULE__} started at #{inspect(self())}")
@@ -136,7 +136,7 @@ defmodule Game.BufferingConversation do
     Logger.info("#{inspect(state)} logged in: #{player_name}")
     set_character_at_a_time_mode(state)
     :gen_tcp.send(state.socket, "You are now known as #{player_name}.\r\n")
-    :gen_tcp.send(state.socket, "> ")
+    :gen_tcp.send(state.socket, state.mode.prompt())
     {:ok, state}
   end
 
@@ -168,7 +168,7 @@ defmodule Game.BufferingConversation do
     try do
       mode = String.to_existing_atom(mode)
       do_output(state.socket, "Switching to mode #{inspect(mode)}")
-      {:reply, :ok, %{state | mode: mode}}
+      {:reply, :ok, %{state | mode: mode, prompt: mode.prompt()}}
     rescue
       error ->
         do_output(state, "#{inspect(mode)} not found")
@@ -182,10 +182,6 @@ defmodule Game.BufferingConversation do
   end
 
   defp do_output(state, string, options \\ [newline: true]) do
-    # debug = :gen_tcp.recv(socket, 1)
-    # IO.inspect(debug)
-    # :ok = :gen_tcp.send(socket, inspect(debug))
-
     Logger.debug("Outputting #{string} with #{inspect(state)}")
 
     state.buffer
@@ -203,7 +199,7 @@ defmodule Game.BufferingConversation do
       :gen_tcp.send(state.socket, '\r\n')
     end
 
-    :gen_tcp.send(state.socket, '> ')
+    :gen_tcp.send(state.socket, state.prompt)
     :gen_tcp.send(state.socket, state.buffer)
   end
 
@@ -246,7 +242,7 @@ defmodule Game.BufferingConversation do
     Logger.debug("Got CR")
     :ok = :gen_tcp.send(state.socket, [@control_codes["CR"], @control_codes["LF"]])
     state.mode.perform(state.me, List.to_string(state.buffer))
-    :gen_tcp.send(state.socket, "> ")
+    :gen_tcp.send(state.socket, state.mode.prompt())
     []
   end
 
