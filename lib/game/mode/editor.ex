@@ -10,7 +10,7 @@ defmodule Game.Mode.Editor do
     Player.notify(player, text)
   end
 
-  def perform(me, line) do
+  def perform(_me, line) do
     lines = Process.get(:lines)
     Process.put(:lines, lines ++ [line])
   end

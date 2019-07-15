@@ -60,7 +60,7 @@ defmodule Game.Player do
   end
 
   def handle_cast({:perform, program}, state) do
-    # ensure Commands is loaded for Symbelix.run
+    Logger.debug("Performing #{inspect(program)} with state #{inspect(state)}")
     message = run(program)
     @conversation.output(state.conversation, "#{program} -> #{inspect(message)}")
     {:noreply, state}

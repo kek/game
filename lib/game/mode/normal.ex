@@ -13,6 +13,7 @@ defmodule Game.Mode.Normal do
           "(#{input})"
         end
 
+      Logger.debug("Performing #{inspect(input)} for #{inspect(me)}")
       Player.perform(me, input)
     end
   end
