@@ -26,13 +26,15 @@ defmodule Game.Player do
     end
   end
 
+  ### Public interface
+
   def notify(pid, {:saying, from, saying}) do
     GenServer.cast(pid, {:notify, {:saying, from, saying}})
   end
 
-  def notify(pid, text) do
-    GenServer.cast(pid, {:notify, text})
-  end
+  # def notify(pid, text) do
+  #   GenServer.cast(pid, {:notify, text})
+  # end
 
   def perform(player, program) do
     GenServer.cast(player, {:perform, program})
@@ -42,13 +44,15 @@ defmodule Game.Player do
     GenServer.cast(player, {:change_mode, mode})
   end
 
-  def prompt(player) do
-    GenServer.cast(player, {:prompt})
-  end
+  # def prompt(player) do
+  #   GenServer.cast(player, {:prompt})
+  # end
 
   def log_off(player) do
     Process.exit(player, :normal)
   end
+
+  ### Callbacks
 
   def handle_call({:name}, _from, state) do
     {:reply, state.name, state}
@@ -61,34 +65,36 @@ defmodule Game.Player do
 
   def handle_cast({:perform, program}, state) do
     Logger.debug("Performing #{inspect(program)} with state #{inspect(state)}")
-    message = run(program)
+    message = run_code(program)
     @conversation.output(state.conversation, "#{program} -> #{inspect(message)}")
     {:noreply, state}
   end
 
-  def handle_cast({:prompt}, state) do
-    prompt = @conversation.prompt(state.conversation)
-    @conversation.output(state.conversation, prompt, newline: false)
-    {:noreply, state}
-  end
+  # def handle_cast({:prompt}, state) do
+  #   prompt = @conversation.prompt(state.conversation)
+  #   @conversation.output(state.conversation, prompt, newline: false)
+  #   {:noreply, state}
+  # end
 
   def handle_cast({:notify, {:saying, from, saying}}, state) do
     player_name = Player.name(from)
-
     @conversation.output(state.conversation, "#{player_name}: #{inspect(saying)}")
     {:noreply, state}
   end
 
-  def handle_cast({:notify, ""}, state) do
-    {:noreply, state}
-  end
+  # def handle_cast({:notify, ""}, state) do
+  #   {:noreply, state}
+  # end
 
-  def handle_cast({:notify, text}, state) do
-    @conversation.output(state.conversation, text)
-    {:noreply, state}
-  end
+  # def handle_cast({:notify, text}, state) do
+  #   Logger.debug("*** Notifying player of #{text}")
+  #   @conversation.output(state.conversation, text)
+  #   {:noreply, state}
+  # end
 
-  defp run(program) do
+  ### Private helpers
+
+  defp run_code(program) do
     Logger.info("Running #{inspect(program)}")
 
     Commands.load()

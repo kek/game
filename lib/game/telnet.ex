@@ -55,11 +55,7 @@ defmodule Game.Telnet do
       "IAC" => 255
     }
 
-  def reverse_commands,
-    do:
-      commands()
-      |> Enum.map(fn {key, value} -> {value, key} end)
-      |> Map.new()
+  def reverse_commands, do: reverse(commands())
 
   def options,
     do: %{
@@ -119,9 +115,11 @@ defmodule Game.Telnet do
       "Extended-Options-List" => 255
     }
 
-  def reverse_options,
-    do:
-      options()
-      |> Enum.map(fn {key, value} -> {value, key} end)
-      |> Map.new()
+  def reverse_options, do: reverse(options())
+
+  defp reverse(map) do
+    map
+    |> Enum.map(fn {key, value} -> {value, key} end)
+    |> Map.new()
+  end
 end

@@ -24,7 +24,6 @@ use Mix.Config
 config :game, :port, 5000
 
 config :game,
-  gen_server_options: [debug: [:trace]],
   conversation: Game.BufferingConversation
 
 # config :game, :gen_server_options, debug: [:trace]

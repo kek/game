@@ -27,6 +27,8 @@ defmodule Game.BufferingConversation do
     {:ok, state}
   end
 
+  ### Public interface
+
   def start(socket) do
     GenServer.start(__MODULE__, [socket], @gen_server_options)
   end
@@ -42,6 +44,8 @@ defmodule Game.BufferingConversation do
   def prompt(conversation) do
     GenServer.call(conversation, {:prompt})
   end
+
+  ### Callbacks
 
   def handle_call({:prompt}, _from, state) do
     {:reply, state.mode.prompt(), state}
@@ -70,6 +74,19 @@ defmodule Game.BufferingConversation do
     do_output(state, string, options)
     {:reply, :ok, state}
   end
+
+  def handle_info({:tcp, socket, input}, state) do
+    buffer = process_input(state, socket, input)
+    Logger.debug("Buffer: #{inspect(buffer)}")
+    {:noreply, %{state | buffer: buffer}}
+  end
+
+  def handle_info({:tcp_closed, socket}, state) do
+    Logger.info("Closed #{inspect(socket)}")
+    {:stop, :normal, state}
+  end
+
+  ### Private helpers
 
   defp do_output(state, string, options \\ [newline: true]) do
     Logger.debug("Outputting #{string} with #{inspect(state)}")
@@ -112,23 +129,12 @@ defmodule Game.BufferingConversation do
     :gen_tcp.send(state.socket, telnet_command)
   end
 
-  def handle_info({:tcp, socket, input}, state) do
-    buffer = perform(state, socket, input)
-    Logger.debug("Buffer: #{inspect(buffer)}")
-    {:noreply, %{state | buffer: buffer}}
-  end
-
-  def handle_info({:tcp_closed, socket}, state) do
-    Logger.info("Closed #{inspect(socket)}")
-    {:stop, :normal, state}
-  end
-
-  defp perform(state, socket, [255, operation, option] ++ input) do
+  defp process_input(state, socket, [255, operation, option] ++ input) do
     Logger.debug("got [IAC, #{@reverse_commands[operation]}, #{@reverse_options[option]}]")
-    state.buffer ++ perform(state, socket, input)
+    state.buffer ++ process_input(state, socket, input)
   end
 
-  defp perform(state, _socket, [13, 0]) do
+  defp process_input(state, _socket, [13, 0]) do
     Logger.debug("Got CR")
     :ok = :gen_tcp.send(state.socket, [@control_codes["CR"], @control_codes["LF"]])
     state.mode.perform(state.me, List.to_string(state.buffer))
@@ -136,13 +142,13 @@ defmodule Game.BufferingConversation do
     []
   end
 
-  defp perform(state, socket, [input | rest]) do
+  defp process_input(state, socket, [input | rest]) do
     :gen_tcp.send(socket, [input])
     Logger.debug("Got #{[input]} (#{input}) from #{inspect(state.me)}")
-    state.buffer ++ [input] ++ perform(state, socket, rest)
+    state.buffer ++ [input] ++ process_input(state, socket, rest)
   end
 
-  defp perform(_state, _socket, []) do
+  defp process_input(_state, _socket, []) do
     []
   end
 end
