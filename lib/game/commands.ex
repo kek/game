@@ -47,13 +47,15 @@ defmodule Game.Commands do
     list
     |> Enum.map(fn item ->
       {:ok, ast} = generate_ast([function, item])
-      Logger.info(inspect(ast))
+      Logger.debug(inspect(ast))
       {result, _binding} = Code.eval_quoted(ast)
       result
     end)
   end
 
   def quit([]) do
+    Logger.debug("Quitting #{inspect(self())}!")
     Player.log_off(self())
+    :quit
   end
 end

@@ -15,7 +15,6 @@ defmodule Game.LineModeConversation do
     player_name = Player.name(player)
     Logger.info("#{inspect(state)} logged in: #{player_name}")
     do_output(socket, "You are now known as #{player_name}.")
-    Player.prompt(player)
     {:ok, state}
   end
 
@@ -87,6 +86,5 @@ defmodule Game.LineModeConversation do
 
     Logger.debug("Performing #{input} for #{inspect(state.me)}")
     state.mode.perform(state.me, String.trim(input))
-    Player.prompt(state.me)
   end
 end

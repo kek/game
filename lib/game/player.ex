@@ -49,6 +49,7 @@ defmodule Game.Player do
   # end
 
   def log_off(player) do
+    Logger.debug("Logging off #{inspect(player)}")
     Process.exit(player, :normal)
   end
 
