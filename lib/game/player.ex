@@ -33,8 +33,8 @@ defmodule Game.Player do
 
   ### Public interface
 
-  def notify(pid, {:saying, from, saying}) do
-    GenServer.cast(pid, {:notify, {:saying, from, saying}})
+  def notify(pid, message) do
+    GenServer.cast(pid, {:notify, message})
   end
 
   def perform(player, program) do
@@ -81,6 +81,11 @@ defmodule Game.Player do
   def handle_cast({:notify, {:saying, from, saying}}, state) do
     player_name = Player.name(from)
     @conversation.output(state.conversation, "#{player_name}: #{inspect(saying)}")
+    {:noreply, state}
+  end
+
+  def handle_cast({:notify, text}, state) do
+    @conversation.output(state.conversation, text)
     {:noreply, state}
   end
 
