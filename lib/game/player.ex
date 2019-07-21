@@ -1,9 +1,9 @@
 defmodule Game.Player do
   use GenServer
   require Logger
-  alias Game.{Player, Commands}
+  alias Game.{Player, Commands, Mode}
 
-  defstruct name: nil, conversation: nil
+  defstruct name: nil, conversation: nil, edited_object: nil
 
   @gen_server_options Application.get_env(:game, :gen_server_options) || []
   @conversation Application.get_env(:game, :conversation)
@@ -41,8 +41,12 @@ defmodule Game.Player do
     GenServer.cast(player, {:perform, program})
   end
 
-  def change_mode(player, mode) do
-    GenServer.cast(player, {:change_mode, mode})
+  def edit(player, name) do
+    GenServer.cast(player, {:edit, name})
+  end
+
+  def done_editing(player, lines) do
+    GenServer.cast(player, {:done_editing, lines})
   end
 
   def log_off(player) do
@@ -60,9 +64,16 @@ defmodule Game.Player do
     {:stop, :normal, state}
   end
 
-  def handle_cast({:change_mode, mode}, state) do
-    @conversation.change_mode(state.conversation, mode)
-    {:noreply, state}
+  def handle_cast({:edit, name}, state) do
+    @conversation.change_mode(state.conversation, Mode.Editor)
+    Logger.debug("Starting editing #{name}")
+    {:noreply, %{state | edited_object: name}}
+  end
+
+  def handle_cast({:done_editing, lines}, state) do
+    @conversation.change_mode(state.conversation, Mode.Normal)
+    Logger.debug("Done editing #{state.edited_object}. Result: #{inspect(lines)}")
+    {:noreply, %{state | edited_object: nil}}
   end
 
   def handle_cast({:perform, program}, state) do

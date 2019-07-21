@@ -35,12 +35,12 @@ defmodule Game.Commands do
     end)
   end
 
-  def mode([mode]) do
-    Player.change_mode(self(), mode)
+  def edit([name]) do
+    Player.edit(self(), name)
   end
 
-  def edit([]) do
-    Player.change_mode(self(), Game.Mode.Editor)
+  def edit(_) do
+    Player.notify(self(), "Usage: edit <object>")
   end
 
   def foreach([list, function]) do
