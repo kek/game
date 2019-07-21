@@ -18,6 +18,11 @@ defmodule Game.Player do
     {:ok, %__MODULE__{conversation: conversation, name: name}}
   end
 
+  def terminate(reason, state) do
+    Logger.debug("Terminating #{inspect(reason)} #{inspect(self())} state #{inspect(state)}")
+    Process.exit(state.conversation, :bye)
+  end
+
   def name(pid) do
     if pid == self() do
       "you"
@@ -32,10 +37,6 @@ defmodule Game.Player do
     GenServer.cast(pid, {:notify, {:saying, from, saying}})
   end
 
-  # def notify(pid, text) do
-  #   GenServer.cast(pid, {:notify, text})
-  # end
-
   def perform(player, program) do
     GenServer.cast(player, {:perform, program})
   end
@@ -44,19 +45,19 @@ defmodule Game.Player do
     GenServer.cast(player, {:change_mode, mode})
   end
 
-  # def prompt(player) do
-  #   GenServer.cast(player, {:prompt})
-  # end
-
   def log_off(player) do
-    Logger.debug("Logging off #{inspect(player)}")
-    Process.exit(player, :normal)
+    GenServer.cast(player, {:log_off})
   end
 
   ### Callbacks
 
   def handle_call({:name}, _from, state) do
     {:reply, state.name, state}
+  end
+
+  def handle_cast({:log_off}, state) do
+    Logger.debug("Logging off #{inspect(self())}")
+    {:stop, :normal, state}
   end
 
   def handle_cast({:change_mode, mode}, state) do
@@ -67,31 +68,21 @@ defmodule Game.Player do
   def handle_cast({:perform, program}, state) do
     Logger.debug("Performing #{inspect(program)} with state #{inspect(state)}")
     message = run_code(program)
-    @conversation.output(state.conversation, "#{program} -> #{inspect(message)}")
-    {:noreply, state}
-  end
 
-  # def handle_cast({:prompt}, state) do
-  #   prompt = @conversation.prompt(state.conversation)
-  #   @conversation.output(state.conversation, prompt, newline: false)
-  #   {:noreply, state}
-  # end
+    if message == :quit do
+      Logger.debug("Quitting because run_code returned :quit #{inspect(self())}")
+      {:stop, :normal, state}
+    else
+      @conversation.output(state.conversation, "#{program} -> #{inspect(message)}")
+      {:noreply, state}
+    end
+  end
 
   def handle_cast({:notify, {:saying, from, saying}}, state) do
     player_name = Player.name(from)
     @conversation.output(state.conversation, "#{player_name}: #{inspect(saying)}")
     {:noreply, state}
   end
-
-  # def handle_cast({:notify, ""}, state) do
-  #   {:noreply, state}
-  # end
-
-  # def handle_cast({:notify, text}, state) do
-  #   Logger.debug("*** Notifying player of #{text}")
-  #   @conversation.output(state.conversation, text)
-  #   {:noreply, state}
-  # end
 
   ### Private helpers
 
@@ -106,9 +97,11 @@ defmodule Game.Player do
           "Error: #{message}"
 
         result when is_list(result) ->
+          Logger.debug("Result in Player.run_code/1: #{inspect(result)}")
           Enum.join(result, ", ")
 
         result ->
+          Logger.debug("Result in Player.run_code/1: #{inspect(result)}")
           result
       end
     rescue

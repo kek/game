@@ -18,6 +18,7 @@ defmodule Game.BufferingConversation do
     Logger.info("#{__MODULE__} started at #{inspect(self())}")
     player = World.create_player(self())
     Process.link(player)
+    Process.flag(:trap_exit, true)
     state = %__MODULE__{socket: socket, me: player}
     player_name = Player.name(player)
     Logger.info("#{inspect(state)} logged in: #{player_name}")
@@ -86,9 +87,17 @@ defmodule Game.BufferingConversation do
     {:stop, :normal, state}
   end
 
+  def handle_info({:EXIT, _pid, :bye}, state) do
+    Logger.debug("Conversation #{inspect(self())} terminating")
+    do_output(state, "Bye", prompt: false)
+    {:stop, :normal, state}
+  end
+
   ### Private helpers
 
-  defp do_output(state, string, options \\ [newline: true]) do
+  defp do_output(state, string, options \\ []) do
+    default_options = [newline: true, prompt: true]
+    options = Keyword.merge(default_options, options)
     Logger.debug("Outputting #{string} with #{inspect(state)}")
 
     state.buffer
@@ -106,8 +115,10 @@ defmodule Game.BufferingConversation do
       :gen_tcp.send(state.socket, '\r\n')
     end
 
-    :gen_tcp.send(state.socket, state.prompt)
-    :gen_tcp.send(state.socket, state.buffer)
+    if options[:prompt] do
+      :gen_tcp.send(state.socket, state.prompt)
+      :gen_tcp.send(state.socket, state.buffer)
+    end
   end
 
   defp set_character_at_a_time_mode(state) do
@@ -137,9 +148,16 @@ defmodule Game.BufferingConversation do
   defp process_input(state, _socket, [13, 0]) do
     Logger.debug("Got CR")
     :ok = :gen_tcp.send(state.socket, [@control_codes["CR"], @control_codes["LF"]])
-    state.mode.perform(state.me, List.to_string(state.buffer))
-    :gen_tcp.send(state.socket, state.mode.prompt())
-    []
+
+    result = state.mode.perform(state.me, List.to_string(state.buffer))
+    Logger.debug("Result: #{inspect(result)}")
+
+    if result == :quit do
+      :quit
+    else
+      :gen_tcp.send(state.socket, state.mode.prompt())
+      []
+    end
   end
 
   defp process_input(state, socket, [input | rest]) do
