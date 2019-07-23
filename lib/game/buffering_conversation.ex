@@ -175,7 +175,7 @@ defmodule Game.BufferingConversation do
     end
   end
 
-  defp process_input(state, socket, [input | [] = rest]) when input >= ?1 and input <= ?z do
+  defp process_input(state, socket, [input | [] = rest]) when input >= ?\s and input <= ?~ do
     :gen_tcp.send(socket, [input])
     Logger.debug("Got #{[input]} (#{input}) from #{inspect(state.me)}. Rest: #{inspect(rest)}")
     state.buffer ++ [input]
