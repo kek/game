@@ -87,7 +87,9 @@ defmodule Game.Commands do
     |> World.lookup_object()
     |> Object.get()
     |> Map.get(:code)
-    |> Enum.map(&output/1)
+    |> Game.Lua.run()
+    |> inspect()
+    |> output()
   end
 
   defp output(text) do
