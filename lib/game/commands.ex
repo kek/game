@@ -1,7 +1,7 @@
 defmodule Game.Commands do
   use Symbelix.Library
   require Logger
-  alias Game.{Player, World}
+  alias Game.{Player, World, Object}
 
   def load() do
     :ok
@@ -36,12 +36,13 @@ defmodule Game.Commands do
     end)
   end
 
-  def edit([name]) do
-    Player.edit(self(), name)
+  def edit([]) do
+    Player.notify(self(), "Usage: edit <object>")
   end
 
-  def edit(_) do
-    Player.notify(self(), "Usage: edit <object>")
+  def edit(name_words) do
+    object_name = Enum.join(name_words, " ")
+    Player.edit(self(), object_name)
   end
 
   def foreach([list, function]) do
@@ -58,5 +59,17 @@ defmodule Game.Commands do
     Logger.debug("Quitting #{inspect(self())}!")
     Player.log_off(self())
     :quit
+  end
+
+  def look([]) do
+    Enum.map(World.objects(), &Object.name/1)
+  end
+
+  def look(object_name_words) do
+    object_name_words
+    |> Enum.join(" ")
+    |> World.lookup_object()
+    |> Object.get()
+    |> inspect()
   end
 end

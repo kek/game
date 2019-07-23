@@ -1,9 +1,9 @@
 defmodule Game.World do
   use GenServer
   require Logger
-  alias Game.Player
+  alias Game.{Player, Object}
 
-  defstruct players: []
+  defstruct players: [], objects: %{}
 
   @gen_server_options Application.get_env(:game, :gen_server_options) || []
 
@@ -16,13 +16,29 @@ defmodule Game.World do
     {:ok, %__MODULE__{}}
   end
 
+  ### Public interface
+
   def create_player(conversation) do
     GenServer.call(__MODULE__, {:create_player, conversation})
+  end
+
+  def create_object(name, contents) do
+    GenServer.call(__MODULE__, {:create_object, name, contents})
   end
 
   def players() do
     GenServer.call(__MODULE__, {:players})
   end
+
+  def objects do
+    GenServer.call(__MODULE__, {:objects})
+  end
+
+  def lookup_object(object_name) do
+    GenServer.call(__MODULE__, {:lookup_object, object_name})
+  end
+
+  ### Callbacks
 
   def handle_call({:create_player, conversation}, _from, state) do
     {:ok, player} = Player.start_link(conversation)
@@ -30,7 +46,24 @@ defmodule Game.World do
     {:reply, player, state}
   end
 
+  def handle_call({:create_object, name, contents}, creator, state) do
+    Logger.debug("World creating object #{name}: #{inspect(contents)}")
+    {:ok, object} = Object.start_link(name, contents, creator)
+    {:reply, :ok, %{state | objects: Map.put(state.objects, name, object)}}
+  end
+
   def handle_call({:players}, _from, state) do
     {:reply, state.players, state}
+  end
+
+  def handle_call({:objects}, _from, state) do
+    object_pids = Map.values(state.objects)
+    {:reply, object_pids, state}
+  end
+
+  def handle_call({:lookup_object, object_name}, _from, state) do
+    object = Map.get(state.objects, object_name)
+    Logger.debug("Getting object with name #{object_name}: #{inspect(object)}")
+    {:reply, object, state}
   end
 end

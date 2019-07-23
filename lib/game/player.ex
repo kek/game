@@ -1,7 +1,7 @@
 defmodule Game.Player do
   use GenServer
   require Logger
-  alias Game.{Player, Commands, Mode}
+  alias Game.{Player, Commands, Mode, World}
 
   defstruct name: nil, conversation: nil, edited_object: nil
 
@@ -83,6 +83,7 @@ defmodule Game.Player do
 
   def handle_cast({:write, object_name, lines}, state) do
     Logger.debug("#{inspect(self())} writing #{inspect(lines)} to #{object_name}")
+    World.create_object(object_name, lines)
     {:noreply, state}
   end
 
