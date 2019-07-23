@@ -160,13 +160,34 @@ defmodule Game.BufferingConversation do
     end
   end
 
-  defp process_input(state, socket, [input | rest]) do
+  defp process_input(state, socket, [127 | [] = rest]) do
+    Logger.debug("Got DEL from #{inspect(state.me)}. Rest: #{inspect(rest)}")
+
+    if state.buffer != [] do
+      :gen_tcp.send(socket, [8, ?\s, 8])
+
+      state.buffer
+      |> Enum.reverse()
+      |> Enum.drop(1)
+      |> Enum.reverse()
+    else
+      state.buffer
+    end
+  end
+
+  defp process_input(state, socket, [input | [] = rest]) when input >= ?1 and input <= ?z do
     :gen_tcp.send(socket, [input])
-    Logger.debug("Got #{[input]} (#{input}) from #{inspect(state.me)}")
-    state.buffer ++ [input] ++ process_input(state, socket, rest)
+    Logger.debug("Got #{[input]} (#{input}) from #{inspect(state.me)}. Rest: #{inspect(rest)}")
+    state.buffer ++ [input]
+    # ++ process_input(state, socket, rest)
   end
 
   defp process_input(_state, _socket, []) do
     []
+  end
+
+  defp process_input(state, _socket, input) do
+    Logger.debug("Ignoring #{inspect(input)}")
+    state.buffer
   end
 end
