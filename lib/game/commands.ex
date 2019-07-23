@@ -85,11 +85,8 @@ defmodule Game.Commands do
     object_name_words
     |> Enum.join(" ")
     |> World.lookup_object()
-    |> Object.get()
-    |> Map.get(:code)
-    |> Game.Lua.run()
+    |> Object.run()
     |> inspect()
-    |> output()
   end
 
   defp output(text) do
