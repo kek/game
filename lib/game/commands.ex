@@ -7,8 +7,9 @@ defmodule Game.Commands do
     :ok
   end
 
-  def say() do
-    "say something"
+  def help([]) do
+    output("Help!")
+    output("Available commands: say <text>, who, edit <object>, look, look <object>, quit")
   end
 
   def say(words) do
@@ -37,7 +38,7 @@ defmodule Game.Commands do
   end
 
   def edit([]) do
-    Player.notify(self(), "Usage: edit <object>")
+    output("Usage: edit <object>")
   end
 
   def edit(name_words) do
@@ -71,5 +72,9 @@ defmodule Game.Commands do
     |> World.lookup_object()
     |> Object.get()
     |> inspect()
+  end
+
+  defp output(text) do
+    Player.notify(self(), text)
   end
 end

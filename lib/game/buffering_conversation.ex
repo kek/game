@@ -23,7 +23,12 @@ defmodule Game.BufferingConversation do
     player_name = Player.name(player)
     Logger.info("#{inspect(state)} logged in: #{player_name}")
     set_character_at_a_time_mode(state)
-    :gen_tcp.send(state.socket, "You are now known as #{player_name}.\r\n")
+
+    :gen_tcp.send(
+      state.socket,
+      "You are now known as #{player_name}.\r\nType 'help' for help.\r\n"
+    )
+
     :gen_tcp.send(state.socket, state.prompt)
     {:ok, state}
   end
