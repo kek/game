@@ -33,8 +33,8 @@ defmodule Game.Player do
 
   ### Public interface
 
-  def notify(pid, message) do
-    GenServer.cast(pid, {:notify, message})
+  def notify(player, message) do
+    GenServer.cast(player, {:notify, message})
   end
 
   def perform(player, program) do
@@ -51,6 +51,10 @@ defmodule Game.Player do
 
   def log_off(player) do
     GenServer.cast(player, {:log_off})
+  end
+
+  def write(player, object_name, lines) do
+    GenServer.cast(player, {:write, object_name, lines})
   end
 
   ### Callbacks
@@ -72,8 +76,14 @@ defmodule Game.Player do
 
   def handle_cast({:done_editing, lines}, state) do
     @conversation.change_mode(state.conversation, Mode.Normal)
-    Logger.debug("Done editing #{state.edited_object}. Result: #{inspect(lines)}")
+    Logger.debug("Finalize editing. State: #{inspect(state)}. Lines: #{inspect(lines)}")
+    Player.write(self(), state.edited_object, lines)
     {:noreply, %{state | edited_object: nil}}
+  end
+
+  def handle_cast({:write, object_name, lines}, state) do
+    Logger.debug("#{inspect(self())} writing #{inspect(lines)} to #{object_name}")
+    {:noreply, state}
   end
 
   def handle_cast({:perform, program}, state) do

@@ -12,6 +12,7 @@ defmodule Game.Commands do
   end
 
   def say(words) do
+    Logger.debug("say #{inspect(words)}")
     saying = Enum.join(words, " ")
     Logger.info("someone says #{saying}!")
 
