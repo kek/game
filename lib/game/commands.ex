@@ -9,7 +9,10 @@ defmodule Game.Commands do
 
   def help([]) do
     output("Help!")
-    output("Available commands: say <text>, who, edit <object>, look, look <object>, quit")
+
+    output(
+      "Available commands: say <text>, who, edit <object>, look, look <object>, run <object>, quit"
+    )
   end
 
   def say(words) do
@@ -73,8 +76,8 @@ defmodule Game.Commands do
     |> Enum.join(" ")
     |> World.lookup_object()
     |> Object.get()
-    |> inspect()
-    |> output()
+    |> Map.get(:code)
+    |> Enum.each(&output/1)
   end
 
   def run([]) do
