@@ -63,7 +63,9 @@ defmodule Game.Commands do
   end
 
   def look([]) do
-    Enum.map(World.objects(), &Object.name/1)
+    World.objects()
+    |> Enum.map(&Object.name/1)
+    |> Enum.each(&output/1)
   end
 
   def look(object_name_words) do
@@ -72,6 +74,20 @@ defmodule Game.Commands do
     |> World.lookup_object()
     |> Object.get()
     |> inspect()
+    |> output()
+  end
+
+  def run([]) do
+    output("Usage: run <object>")
+  end
+
+  def run(object_name_words) do
+    object_name_words
+    |> Enum.join(" ")
+    |> World.lookup_object()
+    |> Object.get()
+    |> Map.get(:code)
+    |> Enum.map(&output/1)
   end
 
   defp output(text) do
