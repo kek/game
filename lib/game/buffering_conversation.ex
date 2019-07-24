@@ -82,7 +82,7 @@ defmodule Game.BufferingConversation do
   end
 
   def handle_info({:tcp, socket, input}, state) do
-    buffer = process_input(state, socket, input)
+    buffer = process_input(state.buffer, state, socket, input)
     Logger.debug("Buffer: #{inspect(buffer)}")
     {:noreply, %{state | buffer: buffer}}
   end
@@ -145,16 +145,16 @@ defmodule Game.BufferingConversation do
     :gen_tcp.send(state.socket, telnet_command)
   end
 
-  defp process_input(state, socket, [255, operation, option] ++ input) do
+  defp process_input(buffer, state, socket, [255, operation, option] ++ input) do
     Logger.debug("got [IAC, #{@reverse_commands[operation]}, #{@reverse_options[option]}]")
-    state.buffer ++ process_input(state, socket, input)
+    buffer ++ process_input(buffer, state, socket, input)
   end
 
-  defp process_input(state, _socket, [13, 0]) do
+  defp process_input(buffer, state, _socket, [13, 0]) do
     Logger.debug("Got CR")
     :ok = :gen_tcp.send(state.socket, [@control_codes["CR"], @control_codes["LF"]])
 
-    result = state.mode.perform(state.me, List.to_string(state.buffer))
+    result = state.mode.perform(state.me, List.to_string(buffer))
     Logger.debug("Result: #{inspect(result)}")
 
     if result == :quit do
@@ -165,34 +165,33 @@ defmodule Game.BufferingConversation do
     end
   end
 
-  defp process_input(state, socket, [127 | [] = rest]) do
-    Logger.debug("Got DEL from #{inspect(state.me)}. Rest: #{inspect(rest)}")
+  defp process_input(buffer, state, socket, [127 | rest]) do
+    Logger.debug("Got DEL from #{inspect(state.me)}. Rest: #{inspect(rest)}. Buffer: #{buffer}")
 
-    if state.buffer != [] do
+    if buffer != [] do
       :gen_tcp.send(socket, [8, ?\s, 8])
 
-      state.buffer
+      buffer
       |> Enum.reverse()
       |> Enum.drop(1)
       |> Enum.reverse()
     else
-      state.buffer
-    end
+      buffer
+    end ++ process_input([], state, socket, rest)
   end
 
-  defp process_input(state, socket, [input | [] = rest]) when input >= ?\s and input <= ?~ do
+  defp process_input(buffer, state, socket, [input | rest]) when input >= ?\s and input <= ?~ do
     :gen_tcp.send(socket, [input])
     Logger.debug("Got #{[input]} (#{input}) from #{inspect(state.me)}. Rest: #{inspect(rest)}")
-    state.buffer ++ [input]
-    # ++ process_input(state, socket, rest)
+    buffer ++ [input] ++ process_input([], state, socket, rest)
   end
 
-  defp process_input(_state, _socket, []) do
+  defp process_input(buffer, _state, _socket, []) do
     []
   end
 
-  defp process_input(state, _socket, input) do
+  defp process_input(buffer, state, socket, [input | rest]) do
     Logger.debug("Ignoring #{inspect(input)}")
-    state.buffer
+    buffer ++ process_input([], state, socket, rest)
   end
 end
