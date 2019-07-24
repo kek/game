@@ -40,6 +40,10 @@ defmodule Game.Object do
     GenServer.call(object, {:run})
   end
 
+  def update_code(object, code) do
+    GenServer.call(object, {:update_code, code})
+  end
+
   ### Callbacks
 
   def handle_call({:name}, _from, state) do
@@ -54,5 +58,9 @@ defmodule Game.Object do
     code = Enum.join(state.code, "\n")
     {result, lua} = :luerl_sandbox.run(code, state.lua)
     {:reply, result, %{state | lua: lua}}
+  end
+
+  def handle_call({:update_code, code}, _from, state) do
+    {:reply, :ok, %{state | code: code}}
   end
 end

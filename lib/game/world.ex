@@ -48,8 +48,17 @@ defmodule Game.World do
 
   def handle_call({:create_object, name, contents}, creator, state) do
     Logger.debug("World creating object #{name}: #{inspect(contents)}")
-    {:ok, object} = Object.start_link(name, contents, creator)
-    {:reply, :ok, %{state | objects: Map.put(state.objects, name, object)}}
+
+    if Map.has_key?(state.objects, name) do
+      state.objects
+      |> Map.get(name)
+      |> Object.update_code(contents)
+
+      {:reply, :ok, state}
+    else
+      {:ok, object} = Object.start_link(name, contents, creator)
+      {:reply, :ok, %{state | objects: Map.put(state.objects, name, object)}}
+    end
   end
 
   def handle_call({:players}, _from, state) do
