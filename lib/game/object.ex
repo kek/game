@@ -1,7 +1,9 @@
 defmodule Game.Object do
   use GenServer
+  require Logger
+  alias Game.{World, Player}
 
-  defstruct name: nil, code: [], creator: nil, st: nil
+  defstruct name: nil, code: [], creator: nil, lua: nil
   @gen_server_options Application.get_env(:game, :gen_server_options) || []
 
   def start_link(name, code, creator) do
@@ -9,7 +11,19 @@ defmodule Game.Object do
   end
 
   def init([name, code, creator]) do
-    {:ok, %__MODULE__{name: name, code: code, creator: creator, st: :luerl_sandbox.init()}}
+    lua = :luerl_sandbox.init()
+
+    say = fn [message], state ->
+      World.players()
+      |> Enum.each(&Player.notify(&1, {:saying, name, message}))
+
+      Logger.debug("say(#{inspect(message)}) from Lua!")
+      {["yo"], state}
+    end
+
+    lua = :luerl.set_table([:say], say, lua)
+
+    {:ok, %__MODULE__{name: name, code: code, creator: creator, lua: lua}}
   end
 
   ### Public interface
@@ -38,7 +52,7 @@ defmodule Game.Object do
 
   def handle_call({:run}, _from, state) do
     code = Enum.join(state.code, "\n")
-    {result, st} = :luerl_sandbox.run(code, state.st)
-    {:reply, result, %{state | st: st}}
+    {result, lua} = :luerl_sandbox.run(code, state.lua)
+    {:reply, result, %{state | lua: lua}}
   end
 end

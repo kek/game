@@ -100,8 +100,12 @@ defmodule Game.Player do
     end
   end
 
-  def handle_cast({:notify, {:saying, from, saying}}, state) do
+  def handle_cast({:notify, {:saying, from, saying}}, state) when is_pid(from) do
     player_name = Player.name(from)
+    handle_cast({:notify, {:saying, player_name, saying}}, state)
+  end
+
+  def handle_cast({:notify, {:saying, player_name, saying}}, state) do
     @conversation.output(state.conversation, "#{player_name}: #{inspect(saying)}")
     {:noreply, state}
   end

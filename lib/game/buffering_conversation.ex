@@ -187,7 +187,7 @@ defmodule Game.BufferingConversation do
   end
 
   defp process_input(buffer, _state, _socket, []) do
-    []
+    buffer
   end
 
   defp process_input(buffer, state, socket, [input | rest]) do
