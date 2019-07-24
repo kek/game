@@ -18,35 +18,40 @@ defmodule Game.Object do
       |> Enum.each(&Player.notify(&1, {:saying, name, message}))
 
       Logger.debug("say(#{inspect(message)}) from Lua!")
-      {["yo"], state}
+      {[message], state}
+    end
+
+    sleep = fn [time], state ->
+      time = trunc(time)
+      Process.sleep(time)
+      {["ok"], state}
     end
 
     lua = :luerl.set_table([:say], say, lua)
+    lua = :luerl.set_table([:sleep], sleep, lua)
 
     {:ok, %__MODULE__{name: name, code: code, creator: creator, lua: lua}}
   end
 
   ### Public interface
 
-  def name(object) do
-    GenServer.call(object, {:name})
-  end
+  def name(object), do: GenServer.call(object, {:name})
 
-  def get(object) do
-    GenServer.call(object, {:get})
-  end
+  def get(object), do: GenServer.call(object, {:get})
 
   def run(nil) do
-    :no_process
+    Player.notify(self(), "That doesn't exist.")
   end
 
-  def run(object) do
-    GenServer.call(object, {:run})
+  def run(object), do: GenServer.call(object, {:run})
+
+  def bg(nil) do
+    Player.notify(self(), "That doesn't exist.")
   end
 
-  def update_code(object, code) do
-    GenServer.call(object, {:update_code, code})
-  end
+  def bg(object), do: GenServer.cast(object, {:bg})
+
+  def update_code(object, code), do: GenServer.call(object, {:update_code, code})
 
   ### Callbacks
 
@@ -58,13 +63,18 @@ defmodule Game.Object do
     {:reply, state, state}
   end
 
-  def handle_call({:run}, _from, state) do
+  def handle_call({:run}, {caller, _}, state) do
     code = Enum.join(state.code, "\n")
 
     {result, lua} =
       case :luerl_sandbox.run(code, state.lua) do
-        {:error, reason} -> {inspect(reason), state.lua}
-        {result, lua} -> {result, lua}
+        {:error, reason} ->
+          Player.notify(state.creator, "Error in #{state.name}: #{inspect(reason)}")
+          {reason, state.lua}
+
+        {result, lua} ->
+          Player.notify(caller, "#{state.name} -> #{inspect(result)}")
+          {result, lua}
       end
 
     {:reply, result, %{state | lua: lua}}
@@ -72,5 +82,23 @@ defmodule Game.Object do
 
   def handle_call({:update_code, code}, _from, state) do
     {:reply, :ok, %{state | code: code}}
+  end
+
+  def handle_cast({:bg}, state) do
+    code = Enum.join(state.code, "\n")
+
+    lua =
+      case :luerl_sandbox.run(code, state.lua) do
+        {:error, reason} ->
+          Player.notify(state.creator, "Error in #{state.name}: #{inspect(reason)}")
+          Logger.debug("Error running code:\n#{code}\n#{inspect(reason)}")
+          state.lua
+
+        {result, lua} ->
+          Logger.debug("OK running code:\n#{code}\nResult:\n#{inspect(result)}")
+          lua
+      end
+
+    {:noreply, %{state | lua: lua}}
   end
 end

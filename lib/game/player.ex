@@ -33,29 +33,17 @@ defmodule Game.Player do
 
   ### Public interface
 
-  def notify(player, message) do
-    GenServer.cast(player, {:notify, message})
-  end
+  def notify(player, message), do: GenServer.cast(player, {:notify, message})
 
-  def perform(player, program) do
-    GenServer.cast(player, {:perform, program})
-  end
+  def perform(player, program), do: GenServer.cast(player, {:perform, program})
 
-  def edit(player, name) do
-    GenServer.cast(player, {:edit, name})
-  end
+  def edit(player, name), do: GenServer.cast(player, {:edit, name})
 
-  def done_editing(player, lines) do
-    GenServer.cast(player, {:done_editing, lines})
-  end
+  def done_editing(player, lines), do: GenServer.cast(player, {:done_editing, lines})
 
-  def log_off(player) do
-    GenServer.cast(player, {:log_off})
-  end
+  def log_off(player), do: GenServer.cast(player, {:log_off})
 
-  def write(player, object_name, lines) do
-    GenServer.cast(player, {:write, object_name, lines})
-  end
+  def write(player, object_name, lines), do: GenServer.cast(player, {:write, object_name, lines})
 
   ### Callbacks
 
@@ -95,7 +83,7 @@ defmodule Game.Player do
       Logger.debug("Quitting because run_code returned :quit #{inspect(self())}")
       {:stop, :normal, state}
     else
-      @conversation.output(state.conversation, "#{program} -> #{inspect(message)}")
+      # @conversation.output(state.conversation, "#{program} -> #{inspect(message)}")
       {:noreply, state}
     end
   end
@@ -124,15 +112,20 @@ defmodule Game.Player do
 
     try do
       case Symbelix.run(program, Commands) do
+        {:error, reason = "Unknown function " <> _} ->
+          Player.notify(self(), "I don't know how to do that.")
+          reason
+
         {:error, message} ->
+          Player.notify(self(), "Error: #{message}")
           "Error: #{message}"
 
         result when is_list(result) ->
-          Logger.debug("Result in Player.run_code/1: #{inspect(result)}")
+          Logger.debug("Result (list) in Player.run_code/1: #{inspect(result)}")
           Enum.join(result, ", ")
 
         result ->
-          Logger.debug("Result in Player.run_code/1: #{inspect(result)}")
+          Logger.debug("Result (other) in Player.run_code/1: #{inspect(result)}")
           result
       end
     rescue

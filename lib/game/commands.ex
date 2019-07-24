@@ -71,6 +71,8 @@ defmodule Game.Commands do
     |> Enum.each(&output/1)
   end
 
+  def l(x), do: look(x)
+
   def look(object_name_words) do
     object_name_words
     |> Enum.join(" ")
@@ -89,6 +91,14 @@ defmodule Game.Commands do
     |> Enum.join(" ")
     |> World.lookup_object()
     |> Object.run()
+    |> inspect()
+  end
+
+  def bg(object_name_words) do
+    object_name_words
+    |> Enum.join(" ")
+    |> World.lookup_object()
+    |> Object.bg()
     |> inspect()
   end
 

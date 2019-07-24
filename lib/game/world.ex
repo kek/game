@@ -46,7 +46,7 @@ defmodule Game.World do
     {:reply, player, state}
   end
 
-  def handle_call({:create_object, name, contents}, creator, state) do
+  def handle_call({:create_object, name, contents}, {creator, _}, state) do
     Logger.debug("World creating object #{name}: #{inspect(contents)}")
 
     if Map.has_key?(state.objects, name) do
