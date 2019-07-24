@@ -36,6 +36,10 @@ defmodule Game.Object do
     GenServer.call(object, {:get})
   end
 
+  def run(nil) do
+    :no_process
+  end
+
   def run(object) do
     GenServer.call(object, {:run})
   end
@@ -56,7 +60,13 @@ defmodule Game.Object do
 
   def handle_call({:run}, _from, state) do
     code = Enum.join(state.code, "\n")
-    {result, lua} = :luerl_sandbox.run(code, state.lua)
+
+    {result, lua} =
+      case :luerl_sandbox.run(code, state.lua) do
+        {:error, reason} -> {inspect(reason), state.lua}
+        {result, lua} -> {result, lua}
+      end
+
     {:reply, result, %{state | lua: lua}}
   end
 
