@@ -53,7 +53,8 @@ defmodule Game.World do
   end
 
   def handle_call({:players}, _from, state) do
-    {:reply, state.players, state}
+    players = Enum.filter(state.players, &Process.alive?/1)
+    {:reply, players, %{state | players: players}}
   end
 
   def handle_call({:objects}, _from, state) do
