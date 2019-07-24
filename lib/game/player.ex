@@ -83,7 +83,6 @@ defmodule Game.Player do
       Logger.debug("Quitting because run_code returned :quit #{inspect(self())}")
       {:stop, :normal, state}
     else
-      # @conversation.output(state.conversation, "#{program} -> #{inspect(message)}")
       {:noreply, state}
     end
   end
