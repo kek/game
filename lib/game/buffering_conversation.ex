@@ -83,7 +83,6 @@ defmodule Game.BufferingConversation do
 
   def handle_info({:tcp, socket, input}, state) do
     buffer = process_input(state.buffer, state, socket, input)
-    Logger.debug("Buffer: #{inspect(buffer)}")
     {:noreply, %{state | buffer: buffer}}
   end
 
@@ -92,8 +91,8 @@ defmodule Game.BufferingConversation do
     {:stop, :normal, state}
   end
 
-  def handle_info({:EXIT, _pid, :bye}, state) do
-    Logger.debug("Conversation #{inspect(self())} terminating")
+  def handle_info({:EXIT, pid, :bye}, state) do
+    Logger.debug("Player #{inspect(pid)} logged off. Conversation #{inspect(self())} terminating")
     do_output(state, "Bye", prompt: false)
     {:stop, :normal, state}
   end
@@ -202,7 +201,6 @@ defmodule Game.BufferingConversation do
 
   defp process_input(buffer, state, socket, [input | rest]) when input >= ?\s and input <= ?~ do
     :gen_tcp.send(socket, [input])
-    Logger.debug("Got #{[input]} (#{input}) from #{inspect(state.me)}. Rest: #{inspect(rest)}")
     buffer ++ [input] ++ process_input([], state, socket, rest)
   end
 
