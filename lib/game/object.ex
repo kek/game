@@ -39,19 +39,15 @@ defmodule Game.Object do
 
   def get(object), do: GenServer.call(object, {:get})
 
-  def run(nil) do
-    Player.notify(self(), "That doesn't exist.")
-  end
-
+  def run(nil), do: Player.notify(self(), "That doesn't exist.")
   def run(object), do: GenServer.call(object, {:run})
 
-  def bg(nil) do
-    Player.notify(self(), "That doesn't exist.")
-  end
-
+  def bg(nil), do: Player.notify(self(), "That doesn't exist.")
   def bg(object), do: GenServer.cast(object, {:bg})
 
   def update_code(object, code), do: GenServer.call(object, {:update_code, code})
+
+  def stop(object), do: GenServer.call(object, {:stop})
 
   ### Callbacks
 
@@ -82,6 +78,11 @@ defmodule Game.Object do
 
   def handle_call({:update_code, code}, _from, state) do
     {:reply, :ok, %{state | code: code}}
+  end
+
+  def handle_call({:stop}, _from, state) do
+    Logger.debug("Stopping #{inspect(self())}")
+    {:stop, :normal, :ok, state}
   end
 
   def handle_cast({:bg}, state) do

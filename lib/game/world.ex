@@ -18,25 +18,18 @@ defmodule Game.World do
 
   ### Public interface
 
-  def create_player(conversation) do
-    GenServer.call(__MODULE__, {:create_player, conversation})
-  end
+  def create_player(conversation), do: GenServer.call(__MODULE__, {:create_player, conversation})
 
-  def create_object(name, contents) do
-    GenServer.call(__MODULE__, {:create_object, name, contents})
-  end
+  def create_object(name, contents),
+    do: GenServer.call(__MODULE__, {:create_object, name, contents})
 
-  def players() do
-    GenServer.call(__MODULE__, {:players})
-  end
+  def players(), do: GenServer.call(__MODULE__, {:players})
 
-  def objects do
-    GenServer.call(__MODULE__, {:objects})
-  end
+  def objects, do: GenServer.call(__MODULE__, {:objects})
 
-  def lookup_object(object_name) do
-    GenServer.call(__MODULE__, {:lookup_object, object_name})
-  end
+  def lookup_object(object_name), do: GenServer.call(__MODULE__, {:lookup_object, object_name})
+
+  def delete_object(object_name), do: GenServer.call(__MODULE__, {:delete_object, object_name})
 
   ### Callbacks
 
@@ -75,5 +68,11 @@ defmodule Game.World do
     object = Map.get(state.objects, object_name)
     Logger.debug("Getting object with name #{object_name}: #{inspect(object)}")
     {:reply, object, state}
+  end
+
+  def handle_call({:delete_object, object_name}, {caller, _}, state) do
+    object = Map.get(state.objects, object_name)
+    :ok = Object.stop(object)
+    {:reply, :ok, %{state | objects: Map.delete(state.objects, object_name)}}
   end
 end

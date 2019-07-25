@@ -88,9 +88,7 @@ defmodule Game.Commands do
     |> Enum.each(&output/1)
   end
 
-  def run([]) do
-    output("Usage: run <object>")
-  end
+  def run([]), do: output("Usage: run <object>")
 
   def run(object_name_words) do
     object_name_words
@@ -106,6 +104,12 @@ defmodule Game.Commands do
     |> World.lookup_object()
     |> Object.bg()
     |> inspect()
+  end
+
+  def delete(object_name_words) do
+    object_name_words
+    |> Enum.join(" ")
+    |> World.delete_object()
   end
 
   defp output(text) do
