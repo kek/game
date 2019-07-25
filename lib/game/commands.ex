@@ -30,12 +30,12 @@ defmodule Game.Commands do
 
   def who([]) do
     World.players()
-    |> Enum.map(fn player ->
+    |> Enum.each(fn player ->
       if player == self() do
-        "Me"
+        output("You")
       else
         Logger.info("Asking name of #{inspect(player)}")
-        Player.name(player)
+        output(Player.name(player))
       end
     end)
   end
