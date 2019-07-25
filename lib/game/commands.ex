@@ -65,13 +65,19 @@ defmodule Game.Commands do
     :quit
   end
 
-  def look([]) do
-    World.objects()
-    |> Enum.map(&Object.name/1)
-    |> Enum.each(&output/1)
-  end
-
   def l(x), do: look(x)
+
+  def look([]) do
+    case World.objects() do
+      [] ->
+        output("There is nothing here.")
+
+      objects ->
+        objects
+        |> Enum.map(&Object.name/1)
+        |> Enum.each(&output/1)
+    end
+  end
 
   def look(object_name_words) do
     object_name_words
