@@ -115,9 +115,14 @@ defmodule Game.Player do
           Player.notify(self(), "I don't know how to do that.")
           reason
 
-        {:error, message} ->
+        error = {:error, message} ->
           Player.notify(self(), "Error: #{message}")
-          "Error: #{message}"
+          error
+
+        error = {:error, message, _line} ->
+          Logger.debug("Error in Player.run_code/1: #{inspect(error)}")
+          Player.notify(self(), "Error: #{inspect(message)}")
+          error
 
         result when is_list(result) ->
           Logger.debug("Result (list) in Player.run_code/1: #{inspect(result)}")
