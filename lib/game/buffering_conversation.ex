@@ -165,6 +165,26 @@ defmodule Game.BufferingConversation do
     end
   end
 
+  defp process_input(buffer, state, socket, [27, ?[, c1, c2, ?~ | rest]) do
+    Logger.debug("Ignoring escape sequence <ESC>[#{[c1, c2]}~")
+    process_input(buffer, state, socket, rest)
+  end
+
+  defp process_input(buffer, state, socket, [27, ?[, c, ?~ | rest]) do
+    Logger.debug("Ignoring escape sequence <ESC>[#{[c]}~")
+    process_input(buffer, state, socket, rest)
+  end
+
+  defp process_input(buffer, state, socket, [27, ?[, c | rest]) do
+    Logger.debug("Ignoring escape sequence <ESC>[#{[c]}")
+    process_input(buffer, state, socket, rest)
+  end
+
+  defp process_input(buffer, state, socket, [27, ?O, c | rest]) do
+    Logger.debug("Ignoring function key <ESC>O#{[c]}")
+    process_input(buffer, state, socket, rest)
+  end
+
   defp process_input(buffer, state, socket, [127 | rest]) do
     Logger.debug("Got DEL from #{inspect(state.me)}. Rest: #{inspect(rest)}. Buffer: #{buffer}")
 
