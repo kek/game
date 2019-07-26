@@ -112,6 +112,16 @@ defmodule Game.Commands do
     |> World.delete_object()
   end
 
+  def restart(_) do
+    output("Restarting, please log in again.")
+
+    Game.World
+    |> Process.whereis()
+    |> Process.exit(:kill)
+
+    Player.log_off(self())
+  end
+
   defp output(text) do
     Player.notify(self(), text)
   end
