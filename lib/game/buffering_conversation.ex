@@ -116,7 +116,9 @@ defmodule Game.BufferingConversation do
 
   ### Private helpers
 
-  defp do_output(state, string, options \\ []) do
+  defp do_output(state, string, options \\ [])
+
+  defp do_output(state, string, options) do
     default_options = [newline: true, prompt: true]
     options = Keyword.merge(default_options, options)
     Logger.debug("Outputting #{string} with #{inspect(state)}")
@@ -127,6 +129,9 @@ defmodule Game.BufferingConversation do
       :gen_tcp.send(state.socket, [8])
     end)
 
+    :gen_tcp.send(state.socket, [8])
+    :gen_tcp.send(state.socket, [8])
+    :gen_tcp.send(state.socket, '  ')
     :gen_tcp.send(state.socket, [8])
     :gen_tcp.send(state.socket, [8])
 
