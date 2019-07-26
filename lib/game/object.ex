@@ -108,4 +108,18 @@ defmodule Game.Object do
 
     {:noreply, %{state | lua: lua}}
   end
+
+  def handle_info({pid, luerl}, state) do
+    Logger.warn(
+      "#{__MODULE__} #{inspect(self())} got unexpected message about #{inspect(pid)}: #{
+        inspect(luerl)
+      }"
+    )
+
+    # Logger.warn("#{inspect(self())} got unexpected message about #{inspect(pid)}")
+
+    # Logger.warn(is_pid(pid))
+
+    {:noreply, state: state}
+  end
 end

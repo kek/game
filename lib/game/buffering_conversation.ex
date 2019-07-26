@@ -98,6 +98,22 @@ defmodule Game.BufferingConversation do
     {:stop, :normal, state}
   end
 
+  def handle_info({:EXIT, pid, :killed}, state) do
+    Logger.debug("Player #{inspect(pid)} was killed. Conversation #{inspect(self())} terminating")
+    do_output(state, "Bye!", prompt: false)
+    {:stop, :normal, state}
+  end
+
+  def handle_info({:EXIT, pid, reason}, state) do
+    Logger.error(
+      "#{__MODULE__} #{inspect(self())} got unexpected exit message about #{inspect(pid)}: #{
+        inspect(reason)
+      }"
+    )
+
+    {:noreply, state: state}
+  end
+
   ### Private helpers
 
   defp do_output(state, string, options \\ []) do
