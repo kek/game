@@ -25,7 +25,7 @@ defmodule Game.Player do
 
   def name(pid) do
     if pid == self() do
-      "you"
+      "You"
     else
       GenServer.call(pid, {:name})
     end
@@ -93,7 +93,14 @@ defmodule Game.Player do
   end
 
   def handle_cast({:notify, {:saying, player_name, saying}}, state) do
-    @conversation.output(state.conversation, "#{player_name}: #{inspect(saying)}")
+    says =
+      if player_name == "You" do
+        "say"
+      else
+        "says"
+      end
+
+    @conversation.output(state.conversation, "#{player_name} #{says} #{inspect(saying)}")
     {:noreply, state}
   end
 
