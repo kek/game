@@ -14,44 +14,8 @@ defmodule Game.World do
   def init([]) do
     Logger.info("#{__MODULE__} started at #{inspect(self())}")
 
-    state =
-      %__MODULE__{}
-      |> do_create_object(
-        "green robot",
-        """
-        say "hi"
-        say "bye"
-        return 0
-        """
-      )
-      |> do_create_object(
-        "red robot",
-        """
-        say "hello"
-        sleep(100)
-        say "bye"
-        return 0
-        """
-      )
-      |> do_create_object(
-        "sleepy robot",
-        """
-        sleep(100)
-        return 0
-        """
-      )
-      |> do_create_object("broken robot", "crash()")
-      |> do_create_object(
-        "repeating robot",
-        """
-        x = 0
-        while true do
-        say(x)
-        sleep(500)
-        x = x + 1
-        end
-        """
-      )
+    state = %__MODULE__{}
+    state = create_default_objects(state)
 
     {:ok, state}
   end
@@ -130,5 +94,27 @@ defmodule Game.World do
       Logger.debug("World created object #{name} (#{inspect(object)}): #{inspect(contents)}")
       %{state | objects: Map.put(state.objects, name, object)}
     end
+  end
+
+  defp create_default_objects(state) do
+    path = "priv/objects"
+    ending = ~r/\.lua/
+
+    state =
+      File.ls!(path)
+      |> Enum.filter(fn filename ->
+        filename =~ ending
+      end)
+      |> Enum.map(fn filename ->
+        Logger.debug(filename)
+        object_name = Regex.replace(ending, filename, "")
+        code = File.read!("#{path}/#{filename}")
+        {object_name, code}
+      end)
+      |> Enum.reduce(state, fn {name, code}, state ->
+        do_create_object(state, name, code)
+      end)
+
+    state
   end
 end
