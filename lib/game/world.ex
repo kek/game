@@ -41,6 +41,17 @@ defmodule Game.World do
         """
       )
       |> do_create_object("broken robot", "crash()")
+      |> do_create_object(
+        "repeating robot",
+        """
+        x = 0
+        while true do
+        say(x)
+        sleep(500)
+        x = x + 1
+        end
+        """
+      )
 
     {:ok, state}
   end
