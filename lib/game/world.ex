@@ -13,7 +13,30 @@ defmodule Game.World do
 
   def init([]) do
     Logger.info("#{__MODULE__} started at #{inspect(self())}")
-    {:ok, %__MODULE__{}}
+
+    state =
+      %__MODULE__{}
+      |> do_create_object(
+        "green robot",
+        """
+        say "hi"
+        say "bye"
+        """
+        |> String.split("\n"),
+        self()
+      )
+      |> do_create_object(
+        "red robot",
+        """
+        say "hello"
+        sleep(100)
+        say "bye"
+        """
+        |> String.split("\n"),
+        self()
+      )
+
+    {:ok, state}
   end
 
   ### Public interface
@@ -40,18 +63,8 @@ defmodule Game.World do
   end
 
   def handle_call({:create_object, name, contents}, {creator, _}, state) do
-    Logger.debug("World creating object #{name}: #{inspect(contents)}")
-
-    if Map.has_key?(state.objects, name) do
-      state.objects
-      |> Map.get(name)
-      |> Object.update_code(contents)
-
-      {:reply, :ok, state}
-    else
-      {:ok, object} = Object.start_link(name, contents, creator)
-      {:reply, :ok, %{state | objects: Map.put(state.objects, name, object)}}
-    end
+    state = do_create_object(state, name, contents, creator)
+    {:reply, :ok, state}
   end
 
   def handle_call({:players}, _from, state) do
@@ -70,9 +83,31 @@ defmodule Game.World do
     {:reply, object, state}
   end
 
-  def handle_call({:delete_object, object_name}, {caller, _}, state) do
+  def handle_call({:delete_object, object_name}, {_, _}, state) do
     object = Map.get(state.objects, object_name)
     :ok = Object.stop(object)
     {:reply, :ok, %{state | objects: Map.delete(state.objects, object_name)}}
+  end
+
+  def handle_cast({:notify, message}, state) do
+    Logger.debug("Notification: #{message}")
+    {:noreply, state}
+  end
+
+  ### Helpers
+
+  defp do_create_object(state, name, contents, creator) do
+    Logger.debug("World creating object #{name}: #{inspect(contents)}")
+
+    if Map.has_key?(state.objects, name) do
+      state.objects
+      |> Map.get(name)
+      |> Object.update_code(contents)
+
+      state
+    else
+      {:ok, object} = Object.start_link(name, contents, creator)
+      %{state | objects: Map.put(state.objects, name, object)}
+    end
   end
 end
