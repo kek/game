@@ -80,12 +80,20 @@ defmodule Game.Commands do
   end
 
   def look(object_name_words) do
-    object_name_words
-    |> Enum.join(" ")
+    object_name = Enum.join(object_name_words, " ")
+
+    object_name
     |> World.lookup_object()
-    |> Object.get_state()
-    |> Map.get(:code)
-    |> Enum.each(&output/1)
+    |> case do
+      nil ->
+        output("There is no #{object_name}.")
+
+      something ->
+        something
+        |> Object.get_state()
+        |> Map.get(:code)
+        |> Enum.each(&output/1)
+    end
   end
 
   def run([]), do: output("Usage: run <object>")
