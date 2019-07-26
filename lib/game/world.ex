@@ -21,8 +21,7 @@ defmodule Game.World do
         """
         say "hi"
         say "bye"
-        """
-        |> String.split("\n"),
+        """,
         self()
       )
       |> do_create_object(
@@ -31,8 +30,14 @@ defmodule Game.World do
         say "hello"
         sleep(100)
         say "bye"
+        """,
+        self()
+      )
+      |> do_create_object(
+        "sleepy robot",
         """
-        |> String.split("\n"),
+        sleep(100)
+        """,
         self()
       )
 
@@ -95,6 +100,10 @@ defmodule Game.World do
   end
 
   ### Helpers
+
+  defp do_create_object(state, name, contents, creator) when is_binary(contents) do
+    do_create_object(state, name, String.split(contents, "\n"), creator)
+  end
 
   defp do_create_object(state, name, contents, creator) do
     Logger.debug("World creating object #{name}: #{inspect(contents)}")
