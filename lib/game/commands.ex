@@ -83,7 +83,7 @@ defmodule Game.Commands do
     object_name_words
     |> Enum.join(" ")
     |> World.lookup_object()
-    |> Object.get()
+    |> Object.get_state()
     |> Map.get(:code)
     |> Enum.each(&output/1)
   end

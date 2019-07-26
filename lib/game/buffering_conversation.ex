@@ -111,7 +111,7 @@ defmodule Game.BufferingConversation do
       }"
     )
 
-    {:noreply, state: state}
+    {:noreply, state}
   end
 
   ### Private helpers

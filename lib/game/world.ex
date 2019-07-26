@@ -21,8 +21,8 @@ defmodule Game.World do
         """
         say "hi"
         say "bye"
-        """,
-        self()
+        return 0
+        """
       )
       |> do_create_object(
         "red robot",
@@ -30,16 +30,17 @@ defmodule Game.World do
         say "hello"
         sleep(100)
         say "bye"
-        """,
-        self()
+        return 0
+        """
       )
       |> do_create_object(
         "sleepy robot",
         """
         sleep(100)
-        """,
-        self()
+        return 0
+        """
       )
+      |> do_create_object("broken robot", "crash()")
 
     {:ok, state}
   end
@@ -101,21 +102,21 @@ defmodule Game.World do
 
   ### Helpers
 
+  defp do_create_object(state, name, contents, creator \\ self())
+
   defp do_create_object(state, name, contents, creator) when is_binary(contents) do
     do_create_object(state, name, String.split(contents, "\n"), creator)
   end
 
   defp do_create_object(state, name, contents, creator) do
-    Logger.debug("World creating object #{name}: #{inspect(contents)}")
-
     if Map.has_key?(state.objects, name) do
-      state.objects
-      |> Map.get(name)
-      |> Object.update_code(contents)
-
+      object = Map.get(state.objects, name)
+      Object.update_code(object, contents)
+      Logger.debug("World updated object #{name} (#{inspect(object)}): #{inspect(contents)}")
       state
     else
       {:ok, object} = Object.start_link(name, contents, creator)
+      Logger.debug("World created object #{name} (#{inspect(object)}): #{inspect(contents)}")
       %{state | objects: Map.put(state.objects, name, object)}
     end
   end

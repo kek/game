@@ -28,7 +28,7 @@ defmodule Game.Object do
     end
 
     crash = fn _, state ->
-      raise RuntimeError
+      _ = 1 / 0
       {["ok"], state}
     end
 
@@ -43,12 +43,20 @@ defmodule Game.Object do
 
   def name(object), do: GenServer.call(object, {:name})
 
-  def get(object), do: GenServer.call(object, {:get})
+  def get_state(object), do: GenServer.call(object, {:get_state})
 
-  def run(nil), do: Player.notify(self(), "That doesn't exist.")
+  def run(nil) do
+    Player.notify(self(), "That doesn't exist.")
+    :ok
+  end
+
   def run(object), do: GenServer.call(object, {:run})
 
-  def bg(nil), do: Player.notify(self(), "That doesn't exist.")
+  def bg(nil) do
+    Player.notify(self(), "That doesn't exist.")
+    :ok
+  end
+
   def bg(object), do: GenServer.cast(object, {:bg})
 
   def update_code(object, code), do: GenServer.call(object, {:update_code, code})
@@ -61,7 +69,7 @@ defmodule Game.Object do
     {:reply, state.name, state}
   end
 
-  def handle_call({:get}, _from, state) do
+  def handle_call({:get_state}, _from, state) do
     {:reply, state, state}
   end
 
@@ -72,6 +80,7 @@ defmodule Game.Object do
       case :luerl_sandbox.run(code, state.lua) do
         {:error, reason} ->
           Player.notify(state.creator, "Error in #{state.name}: #{inspect(reason)}")
+          Player.notify(caller, "Error in #{state.name}: #{inspect(reason)}")
           {reason, state.lua}
 
         {result, lua} ->
@@ -120,6 +129,6 @@ defmodule Game.Object do
 
     # Logger.warn(is_pid(pid))
 
-    {:noreply, state: state}
+    {:noreply, state}
   end
 end
