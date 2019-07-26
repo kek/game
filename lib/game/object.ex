@@ -27,8 +27,14 @@ defmodule Game.Object do
       {["ok"], state}
     end
 
+    crash = fn _, state ->
+      raise RuntimeError
+      {["ok"], state}
+    end
+
     lua = :luerl.set_table([:say], say, lua)
     lua = :luerl.set_table([:sleep], sleep, lua)
+    lua = :luerl.set_table([:crash], crash, lua)
 
     {:ok, %__MODULE__{name: name, code: code, creator: creator, lua: lua}}
   end
