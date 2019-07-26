@@ -88,6 +88,7 @@ defmodule Game.BufferingConversation do
 
   def handle_info({:tcp_closed, socket}, state) do
     Logger.info("Closed #{inspect(socket)}")
+    Player.log_off(state.me)
     {:stop, :normal, state}
   end
 
