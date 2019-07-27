@@ -35,6 +35,8 @@ defmodule Game.World do
 
   def delete_object(object_name), do: GenServer.call(__MODULE__, {:delete_object, object_name})
 
+  def reload(), do: GenServer.call(__MODULE__, {:reload})
+
   ### Callbacks
 
   def handle_call({:create_player, conversation}, _from, state) do
@@ -68,6 +70,11 @@ defmodule Game.World do
     object = Map.get(state.objects, object_name)
     :ok = Object.stop(object)
     {:reply, :ok, %{state | objects: Map.delete(state.objects, object_name)}}
+  end
+
+  def handle_call({:reload}, _from, state) do
+    state = state |> create_default_objects()
+    {:reply, :ok, state}
   end
 
   def handle_cast({:notify, message}, state) do
@@ -106,7 +113,6 @@ defmodule Game.World do
         filename =~ ending
       end)
       |> Enum.map(fn filename ->
-        Logger.debug(filename)
         object_name = Regex.replace(ending, filename, "")
         code = File.read!("#{path}/#{filename}")
         {object_name, code}

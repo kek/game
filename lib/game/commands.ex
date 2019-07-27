@@ -130,6 +130,10 @@ defmodule Game.Commands do
     Player.log_off(self())
   end
 
+  def reload(_) do
+    Game.World.reload()
+  end
+
   defp output(text) do
     Player.notify(self(), text)
   end
