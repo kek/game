@@ -8,11 +8,24 @@ defmodule Game.Commands do
   end
 
   def help([]) do
-    output("Help!")
+    """
+    Available commands:
 
-    output(
-      "Available commands: say <text>, who, edit <object>, look, look <object>, run <object>, quit"
-    )
+    say <text>        Say something to other users
+    who               See who is online
+    edit <object>     Create an object or update an object's code
+    delete <object>   Delete an object
+    look              See objects
+    look <object>     Examine an object
+    run <object>      Run an object's code
+    bg <object>       Run an object's code asynchronously
+    restart           Restart the server
+    reload            Reload default objects
+    quit              Log out
+    """
+    |> String.trim()
+    |> String.split("\n")
+    |> Enum.each(&output/1)
   end
 
   def say(words) do
