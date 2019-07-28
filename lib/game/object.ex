@@ -5,6 +5,7 @@ defmodule Game.Object do
 
   defstruct name: nil, code: [], creator: nil, lua: nil
   @gen_server_options Application.get_env(:game, :gen_server_options) || []
+  @max_reductions 20000
 
   def start_link(name, code, creator) do
     GenServer.start_link(__MODULE__, [name, code, creator], @gen_server_options)
@@ -77,7 +78,7 @@ defmodule Game.Object do
     code = Enum.join(state.code, "\n")
 
     {result, lua} =
-      case :luerl_sandbox.run(code, state.lua) do
+      case :luerl_sandbox.run(code, state.lua, @max_reductions) do
         {:error, reason} ->
           Player.notify(state.creator, "Error in #{state.name}: #{inspect(reason)}")
           Player.notify(caller, "Error in #{state.name}: #{inspect(reason)}")
@@ -104,7 +105,7 @@ defmodule Game.Object do
     code = Enum.join(state.code, "\n")
 
     lua =
-      case :luerl_sandbox.run(code, state.lua) do
+      case :luerl_sandbox.run(code, state.lua, @max_reductions) do
         {:error, reason} ->
           Player.notify(state.creator, "Error in #{state.name}: #{inspect(reason)}")
           Logger.debug("Error running code:\n#{code}\n#{inspect(reason)}")
