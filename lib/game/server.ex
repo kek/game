@@ -9,18 +9,19 @@ defmodule Game.Server do
     defstruct nothing: nil
   end
 
-  def init(port) do
-    Logger.info("#{__MODULE__} started at #{inspect(self())}")
-
+  def init(port, suppress_waiting_message \\ false) do
     case :gen_tcp.listen(port, []) do
       {:ok, listening_socket} ->
         Logger.info("listening at socket #{inspect(listening_socket)}")
         {:ok, %State{}, {:continue, listening_socket}}
 
       {:error, :eaddrinuse} ->
-        Logger.info("Port #{port} in use, waiting...")
-        Process.sleep(5000)
-        init(port)
+        unless suppress_waiting_message do
+          Logger.info("Port #{port} in use, waiting...")
+        end
+
+        Process.sleep(1000)
+        init(port, true)
     end
   end
 

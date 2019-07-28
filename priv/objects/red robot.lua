@@ -1,4 +1,4 @@
 say "hello"
-sleep(100)
+sleep(1000)
 say "bye"
 return 0
