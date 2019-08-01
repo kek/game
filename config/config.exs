@@ -23,9 +23,6 @@ use Mix.Config
 
 config :game, :port, 5000
 
-config :game,
-  conversation: Game.BufferingConversation
-
 # config :game, :gen_server_options, debug: [:trace]
 
 # It is also possible to import configuration files, relative to this

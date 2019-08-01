@@ -2,8 +2,9 @@ defmodule Game.ObjectTest do
   use ExUnit.Case
   alias Game.Object
 
+  @tag :pending
   test "handles timeout failures" do
-    code = ["say \"hi\"", "sleep(1000)", "say \"bye\""]
+    code = ["say \"hi\"", "sleep(5000)", "say \"bye\""]
     {:ok, obj} = Object.start_link("object", code, self())
     assert Process.alive?(obj)
     assert Object.run(obj) == :timeout

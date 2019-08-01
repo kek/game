@@ -6,7 +6,7 @@ defmodule Game.Player do
   defstruct name: nil, conversation: nil, edited_object: nil
 
   @gen_server_options Application.get_env(:game, :gen_server_options) || []
-  @conversation Application.get_env(:game, :conversation)
+  @conversation Game.BufferingConversation
 
   def start_link(conversation) do
     GenServer.start_link(__MODULE__, [conversation], @gen_server_options)

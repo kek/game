@@ -12,7 +12,8 @@ defmodule Game.Application do
       # {Game.Worker, arg}
       {Game.Server, [Application.get_env(:game, :port)]},
       {Game.World, []},
-      {Game.RoomSupervisor, []}
+      {Game.RoomSupervisor, []},
+      {Game.ConversationSupervisor, []}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

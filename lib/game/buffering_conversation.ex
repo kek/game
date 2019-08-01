@@ -35,8 +35,8 @@ defmodule Game.BufferingConversation do
 
   ### Public interface
 
-  def start(socket) do
-    GenServer.start(__MODULE__, [socket], @gen_server_options)
+  def start_link([], [socket]) do
+    GenServer.start_link(__MODULE__, [socket], @gen_server_options)
   end
 
   def output(conversation, string, options \\ [newline: true]) do
