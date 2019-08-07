@@ -121,7 +121,6 @@ defmodule Game.BufferingConversation do
   defp do_output(state, string, options) do
     default_options = [newline: true, prompt: true]
     options = Keyword.merge(default_options, options)
-    Logger.debug("Outputting #{string} with #{inspect(state)}")
 
     state.buffer
     |> Enum.each(fn _ ->

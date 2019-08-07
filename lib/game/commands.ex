@@ -13,7 +13,7 @@ defmodule Game.Commands do
 
     say <text>        Say something to other users
     who               See who is online
-    edit <object>     Create an object or update an object's code
+    edit <object>     Create an object or update its code
     delete <object>   Delete an object
     look              See objects
     look <object>     Examine an object
