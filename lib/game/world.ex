@@ -66,7 +66,12 @@ defmodule Game.World do
   end
 
   def handle_call({:lookup_object, object_name}, _from, state) do
-    object = Map.get(state.objects, object_name)
+    object = case Map.get(state.objects, object_name) do
+      nil -> nil
+      object -> if Process.alive?(object) do
+        object
+      end
+    end
     Logger.debug("Getting object with name #{object_name}: #{inspect(object)}")
     {:reply, object, state}
   end
@@ -107,9 +112,11 @@ defmodule Game.World do
   end
 
   defp do_create_object(state, name, contents, creator) do
-    if Map.has_key?(state.objects, name) do
+    if Map.has_key?(state.objects, name) and Process.alive?(Map.get(state.objects, name)) do
       object = Map.get(state.objects, name)
-      Object.update_code(object, contents)
+      if Process.alive? object do
+        Object.update_code(object, contents)
+      end
       Logger.debug("World updated object #{name} (#{inspect(object)}): #{inspect(contents)}")
       state
     else

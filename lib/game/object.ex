@@ -14,6 +14,8 @@ defmodule Game.Object do
   def init([name, code, creator]) do
     lua = :luerl_sandbox.init()
 
+    me = self()
+
     say = fn [message], lua_state ->
       World.players()
       |> Enum.each(&Player.notify(&1, {:saying, name, message}))
@@ -33,6 +35,7 @@ defmodule Game.Object do
       {["ok"], lua_state}
     end
 
+    # Make another object
     build = fn [_program], lua_state ->
       {["ok"], lua_state}
     end
@@ -44,6 +47,7 @@ defmodule Game.Object do
 
         target ->
           {_, _} = say.(["I eat #{target_name}."], lua_state)
+          feed(me, 1)
           stop(target)
       end
 
@@ -80,6 +84,8 @@ defmodule Game.Object do
   def update_code(object, code), do: GenServer.call(object, {:update_code, code})
 
   def stop(object), do: GenServer.call(object, {:stop})
+
+  def feed(object, amount), do: GenServer.cast(object, {:feed, amount})
 
   ### Callbacks
 
@@ -136,6 +142,10 @@ defmodule Game.Object do
       end
 
     {:noreply, %{state | lua: lua}}
+  end
+
+  def handle_cast({:feed, amount}, state) do
+    {:noreply, %{state | food: state.food + amount}}
   end
 
   def handle_info({pid, luerl}, state) do
