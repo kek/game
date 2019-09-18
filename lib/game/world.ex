@@ -37,6 +37,8 @@ defmodule Game.World do
 
   def reload(), do: GenServer.call(__MODULE__, {:reload})
 
+  def name(thing), do: GenServer.call(__MODULE__, {:name, thing})
+
   ### Callbacks
 
   def handle_call({:create_player, conversation}, _from, state) do
@@ -56,7 +58,10 @@ defmodule Game.World do
   end
 
   def handle_call({:objects}, _from, state) do
-    object_pids = Map.values(state.objects)
+    object_pids =
+      state.objects
+      |> Map.values()
+      |> Enum.filter(&Process.alive?/1)
     {:reply, object_pids, state}
   end
 
@@ -75,6 +80,17 @@ defmodule Game.World do
   def handle_call({:reload}, _from, state) do
     state = state |> create_default_objects()
     {:reply, :ok, state}
+  end
+
+  def handle_call({:name, thing}, _from, state) do
+    {:reply,
+      cond do
+        thing == self() -> "the world"
+        thing in state.players -> Player.name(thing)
+        thing in Map.values(state.objects) -> Object.name(thing)
+        true -> "an unknown entity"
+      end,
+      state}
   end
 
   def handle_cast({:notify, message}, state) do

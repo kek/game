@@ -1,5 +1,5 @@
 x = 0
-while true do
+while x < 20 do
    say(x)
    sleep(500)
    x = x + 1

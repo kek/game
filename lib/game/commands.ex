@@ -102,10 +102,17 @@ defmodule Game.Commands do
         output("There is no #{object_name}.")
 
       something ->
-        something
-        |> Object.get_state()
-        |> Map.get(:code)
-        |> Enum.each(&output/1)
+        state = Object.get_state(something)
+
+        creator_name = if state.creator == self() do
+          "me"
+        else
+          World.name(state.creator)
+        end
+
+        output("#{state.name}. food: #{state.food}. Created by #{creator_name}.\n")
+
+        Enum.each(state.code, &output/1)
     end
   end
 

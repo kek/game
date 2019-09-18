@@ -3,7 +3,7 @@ defmodule Game.Object do
   require Logger
   alias Game.{World, Player}
 
-  defstruct name: nil, code: [], creator: nil, lua: nil
+  defstruct name: nil, code: [], creator: nil, lua: nil, food: 0
   @gen_server_options Application.get_env(:game, :gen_server_options) || []
   @max_reductions 20000
 
@@ -14,36 +14,53 @@ defmodule Game.Object do
   def init([name, code, creator]) do
     lua = :luerl_sandbox.init()
 
-    say = fn [message], state ->
+    say = fn [message], lua_state ->
       World.players()
       |> Enum.each(&Player.notify(&1, {:saying, name, message}))
 
       Logger.debug("say(#{inspect(message)}) from Lua!")
-      {[message], state}
+      {[message], lua_state}
     end
 
-    sleep = fn [time], state ->
+    sleep = fn [time], lua_state ->
       time = trunc(time)
       Process.sleep(time)
-      {["ok"], state}
+      {["ok"], lua_state}
     end
 
-    crash = fn _, state ->
+    crash = fn _, lua_state ->
       _ = 1 / 0
-      {["ok"], state}
+      {["ok"], lua_state}
+    end
+
+    build = fn [_program], lua_state ->
+      {["ok"], lua_state}
+    end
+
+    eat = fn [target_name], lua_state ->
+      case World.lookup_object(target_name) do
+        nil ->
+          say.(["I can't find #{target_name}"], lua_state)
+
+        target ->
+          {_, _} = say.(["I eat #{target_name}."], lua_state)
+          stop(target)
+      end
+
+      {["ok"], lua_state}
     end
 
     lua = :luerl.set_table([:say], say, lua)
     lua = :luerl.set_table([:sleep], sleep, lua)
     lua = :luerl.set_table([:crash], crash, lua)
+    lua = :luerl.set_table([:build], build, lua)
+    lua = :luerl.set_table([:eat], eat, lua)
 
     {:ok, %__MODULE__{name: name, code: code, creator: creator, lua: lua}}
   end
 
   ### Public interface
-
   def name(object), do: GenServer.call(object, {:name})
-
   def get_state(object), do: GenServer.call(object, {:get_state})
 
   def run(nil) do
@@ -97,6 +114,8 @@ defmodule Game.Object do
   end
 
   def handle_call({:stop}, _from, state) do
+    World.players()
+    |> Enum.each(&Player.notify(&1, {:saying, state.name, "Stops now"}))
     Logger.debug("Stopping #{inspect(self())}")
     {:stop, :normal, :ok, state}
   end
