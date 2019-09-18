@@ -40,7 +40,7 @@ defmodule Game.BufferingConversation do
   end
 
   def output(conversation, string, options \\ [newline: true]) do
-    GenServer.call(conversation, {:output, string, options})
+    GenServer.cast(conversation, {:output, string, options})
   end
 
   def change_mode(conversation, mode) do
@@ -76,9 +76,9 @@ defmodule Game.BufferingConversation do
     end
   end
 
-  def handle_call({:output, string, options}, _from, state) do
+  def handle_cast({:output, string, options}, state) do
     do_output(state, string, options)
-    {:reply, :ok, state}
+    {:noreply, state}
   end
 
   def handle_info({:tcp, socket, input}, state) do

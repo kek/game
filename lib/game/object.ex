@@ -64,6 +64,7 @@ defmodule Game.Object do
   end
 
   ### Public interface
+
   def name(object), do: GenServer.call(object, {:name})
   def get_state(object), do: GenServer.call(object, {:get_state})
 
@@ -83,7 +84,7 @@ defmodule Game.Object do
 
   def update_code(object, code), do: GenServer.call(object, {:update_code, code})
 
-  def stop(object), do: GenServer.call(object, {:stop})
+  def stop(object), do: GenServer.cast(object, {:stop})
 
   def feed(object, amount), do: GenServer.cast(object, {:feed, amount})
 
@@ -119,12 +120,12 @@ defmodule Game.Object do
     {:reply, :ok, %{state | code: code}}
   end
 
-  def handle_call({:stop}, _from, state) do
+  def handle_cast({:stop}, state) do
     World.players()
     |> Enum.each(&Player.notify(&1, {:saying, state.name, "Stops now"}))
 
     Logger.debug("Stopping #{inspect(self())}")
-    {:stop, :normal, :ok, state}
+    {:stop, :normal, state}
   end
 
   def handle_cast({:bg}, state) do
