@@ -62,16 +62,22 @@ defmodule Game.World do
       state.objects
       |> Map.values()
       |> Enum.filter(&Process.alive?/1)
+
     {:reply, object_pids, state}
   end
 
   def handle_call({:lookup_object, object_name}, _from, state) do
-    object = case Map.get(state.objects, object_name) do
-      nil -> nil
-      object -> if Process.alive?(object) do
-        object
+    object =
+      case Map.get(state.objects, object_name) do
+        nil ->
+          nil
+
+        object ->
+          if Process.alive?(object) do
+            object
+          end
       end
-    end
+
     Logger.debug("Getting object with name #{object_name}: #{inspect(object)}")
     {:reply, object, state}
   end
@@ -89,13 +95,12 @@ defmodule Game.World do
 
   def handle_call({:name, thing}, _from, state) do
     {:reply,
-      cond do
-        thing == self() -> "the world"
-        thing in state.players -> Player.name(thing)
-        thing in Map.values(state.objects) -> Object.name(thing)
-        true -> "an unknown entity"
-      end,
-      state}
+     cond do
+       thing == self() -> "the world"
+       thing in state.players -> Player.name(thing)
+       thing in Map.values(state.objects) -> Object.name(thing)
+       true -> "an unknown entity"
+     end, state}
   end
 
   def handle_cast({:notify, message}, state) do
@@ -114,9 +119,11 @@ defmodule Game.World do
   defp do_create_object(state, name, contents, creator) do
     if Map.has_key?(state.objects, name) and Process.alive?(Map.get(state.objects, name)) do
       object = Map.get(state.objects, name)
-      if Process.alive? object do
+
+      if Process.alive?(object) do
         Object.update_code(object, contents)
       end
+
       Logger.debug("World updated object #{name} (#{inspect(object)}): #{inspect(contents)}")
       state
     else

@@ -104,11 +104,12 @@ defmodule Game.Commands do
       something ->
         state = Object.get_state(something)
 
-        creator_name = if state.creator == self() do
-          "me"
-        else
-          World.name(state.creator)
-        end
+        creator_name =
+          if state.creator == self() do
+            "me"
+          else
+            World.name(state.creator)
+          end
 
         output("#{state.name}. food: #{state.food}. Created by #{creator_name}.\n")
 

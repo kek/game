@@ -122,6 +122,7 @@ defmodule Game.Object do
   def handle_call({:stop}, _from, state) do
     World.players()
     |> Enum.each(&Player.notify(&1, {:saying, state.name, "Stops now"}))
+
     Logger.debug("Stopping #{inspect(self())}")
     {:stop, :normal, :ok, state}
   end

@@ -1,7 +1,7 @@
 use Mix.Config
 
 config :game,
-#  gen_server_options: []
+  #  gen_server_options: []
   gen_server_options: [debug: [:trace]]
 
 config :logger,
