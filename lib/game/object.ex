@@ -167,7 +167,7 @@ defmodule Game.Object do
 
   def handle_cast({:stop}, state) do
     World.players()
-    |> Enum.each(&Player.notify(&1, {:saying, state.name, "Stops now"}))
+    |> Enum.each(&Player.notify(&1, {:saying, state.name, "Goodbye"}))
 
     Logger.debug("Stopping #{inspect(self())}")
     {:stop, :normal, state}
