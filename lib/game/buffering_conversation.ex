@@ -92,6 +92,12 @@ defmodule Game.BufferingConversation do
     {:stop, :normal, state}
   end
 
+  def handle_info({:EXIT, pid, {:timeout, details}}, state) do
+    Logger.debug("Timeout in #{inspect(pid)}: #{inspect(details)}")
+    do_output(state, "Timeout in #{inspect(pid)}: #{inspect(details)}", prompt: false)
+    {:noreply, state}
+  end
+
   def handle_info({:EXIT, pid, :bye}, state) do
     Logger.debug("Player #{inspect(pid)} logged off. Conversation #{inspect(self())} terminating")
     do_output(state, "Bye", prompt: false)
@@ -118,7 +124,7 @@ defmodule Game.BufferingConversation do
 
   defp do_output(state, string, options \\ [])
 
-  defp do_output(state, string, options) do
+  defp do_output(state, string, options) when is_binary(string) do
     default_options = [newline: true, prompt: true]
     options = Keyword.merge(default_options, options)
 
@@ -134,7 +140,19 @@ defmodule Game.BufferingConversation do
     :gen_tcp.send(state.socket, [8])
     :gen_tcp.send(state.socket, [8])
 
-    :ok = :gen_tcp.send(state.socket, String.to_charlist(string))
+    Logger.debug("Outputting #{inspect(string)}")
+
+    case :gen_tcp.send(state.socket, String.to_charlist(string)) do
+      :ok ->
+        true
+
+      {:error, reason} ->
+        Logger.error(
+          "Error in do_output: #{inspect(reason)}, socket #{inspect(state.socket)}, output: #{
+            inspect(string)
+          }"
+        )
+    end
 
     if options[:newline] == true do
       :gen_tcp.send(state.socket, '\r\n')

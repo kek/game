@@ -1,7 +1,7 @@
 defmodule Game.Object do
   use GenServer
   require Logger
-  alias Game.{World, Player}
+  alias Game.{World, Player, Object}
 
   defstruct name: nil, code: [], creator: nil, lua: nil, food: 0
   @gen_server_options Application.get_env(:game, :gen_server_options) || []
@@ -36,7 +36,28 @@ defmodule Game.Object do
     end
 
     # Make another object
-    build = fn [_program], lua_state ->
+    build = fn [program], lua_state ->
+      parts = String.split(name, " ")
+      last_part = List.last(parts)
+
+      new_name =
+        if last_part =~ ~r/^[0-9]+$/ do
+          base_name =
+            parts
+            |> Enum.reverse()
+            |> Enum.drop(1)
+            |> Enum.reverse()
+            |> Enum.join(" ")
+
+          number = String.to_integer(last_part)
+          "#{base_name} #{number + 1}"
+        else
+          "#{name} 2"
+        end
+
+      Logger.debug("new name: #{new_name}, program: #{program}")
+
+      World.create_object(new_name, program)
       {["ok"], lua_state}
     end
 
@@ -54,11 +75,35 @@ defmodule Game.Object do
       {["ok"], lua_state}
     end
 
+    look = fn [], lua_state ->
+      # World.players()
+      # |> Enum.each(&Player.notify(&1, {:saying, name, "i'm looking"}))
+
+      Logger.debug("LOOK. I am #{inspect(me)}. Creator is #{inspect(creator)}")
+
+      names =
+        World.objects()
+        |> Enum.reject(fn pid ->
+          pid == me
+        end)
+        |> Enum.map(fn pid ->
+          Logger.debug("Looking up #{inspect(pid)}")
+          name = Object.name(pid)
+          Logger.debug("Name for #{inspect(pid)} is #{name}")
+          name
+        end)
+
+      Logger.debug("NAMES: #{inspect(names)}")
+
+      {[names], lua_state}
+    end
+
     lua = :luerl.set_table([:say], say, lua)
     lua = :luerl.set_table([:sleep], sleep, lua)
     lua = :luerl.set_table([:crash], crash, lua)
     lua = :luerl.set_table([:build], build, lua)
     lua = :luerl.set_table([:eat], eat, lua)
+    lua = :luerl.set_table([:look], look, lua)
 
     {:ok, %__MODULE__{name: name, code: code, creator: creator, lua: lua}}
   end

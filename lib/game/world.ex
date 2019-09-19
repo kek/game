@@ -57,11 +57,16 @@ defmodule Game.World do
     {:reply, players, %{state | players: players}}
   end
 
-  def handle_call({:objects}, _from, state) do
+  def handle_call({:objects}, {from, _}, state) do
+    Logger.debug("OBJECTS")
+
     object_pids =
       state.objects
       |> Map.values()
+      |> Enum.reject(&(&1 == from))
       |> Enum.filter(&Process.alive?/1)
+
+    Logger.debug("OBJECTS: #{inspect(object_pids)}")
 
     {:reply, object_pids, state}
   end
