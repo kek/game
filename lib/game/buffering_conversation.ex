@@ -130,7 +130,6 @@ defmodule Game.BufferingConversation do
 
     state.buffer
     |> Enum.each(fn _ ->
-      Logger.debug("Backing up")
       :gen_tcp.send(state.socket, [8])
     end)
 
@@ -139,8 +138,6 @@ defmodule Game.BufferingConversation do
     :gen_tcp.send(state.socket, '  ')
     :gen_tcp.send(state.socket, [8])
     :gen_tcp.send(state.socket, [8])
-
-    Logger.debug("Outputting #{inspect(string)}")
 
     case :gen_tcp.send(state.socket, String.to_charlist(string)) do
       :ok ->
