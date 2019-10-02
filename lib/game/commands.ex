@@ -18,7 +18,7 @@ defmodule Game.Commands do
     look              See objects
     look <object>     Examine an object
     run <object>      Run an object's code
-    bg <object>       Run an object's code asynchronously
+    fg <object>       Run an object's code synchronously
     restart           Restart the server
     reload            Reload default objects
     quit              Log out
@@ -117,9 +117,9 @@ defmodule Game.Commands do
     end
   end
 
-  def run([]), do: output("Usage: run <object>")
+  def fg([]), do: output("Usage: fg <object>")
 
-  def run(object_name_words) do
+  def fg(object_name_words) do
     object_name_words
     |> Enum.join(" ")
     |> World.lookup_object()
@@ -127,7 +127,9 @@ defmodule Game.Commands do
     |> inspect()
   end
 
-  def bg(object_name_words) do
+  def run([]), do: output("Usage: run <object>")
+
+  def run(object_name_words) do
     object_name_words
     |> Enum.join(" ")
     |> World.lookup_object()
